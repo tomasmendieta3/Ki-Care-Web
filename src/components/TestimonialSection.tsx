@@ -162,7 +162,7 @@ const TestimonialSection = () => {
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
             className="border border-zinc-200 rounded-2xl overflow-hidden flex flex-col"
           >
             {/* Blank photo box */}
@@ -194,7 +194,7 @@ const TestimonialSection = () => {
             initial={{ opacity: 0, x: 24 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
             className="flex flex-col gap-3"
             style={leftHeight ? { height: leftHeight } : undefined}
           >
@@ -207,7 +207,7 @@ const TestimonialSection = () => {
                     initial={{ opacity: 0, y: direction * 28 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: direction * -28 }}
-                    transition={{ duration: 0.32, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 0.32, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
                     className="border border-zinc-200 rounded-xl px-5 py-4 bg-white flex flex-col gap-2.5 shrink-0"
                   >
                     <div className="flex items-center gap-3">

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Modal, Button, Chip } from "@heroui/react";
+import { Modal } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   X,
@@ -54,7 +54,7 @@ const ProductoModal = ({ producto, onClose }: ProductoModalProps) => {
 
   return (
     <Modal
-      state={{ isOpen: true, setOpen: (open) => { if (!open) onClose(); } }}
+      state={{ isOpen: true, open: () => {}, close: onClose, toggle: () => {}, setOpen: (open) => { if (!open) onClose(); } }}
     >
       <Modal.Backdrop variant="blur" isDismissable>
         <Modal.Container scroll="inside">

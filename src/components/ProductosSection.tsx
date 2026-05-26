@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Button, Chip } from "@heroui/react";
 import { motion } from "framer-motion";
 import { Star, ShoppingBag } from "lucide-react";
 import { productos, formatPrice, type Producto } from "@/data/productos.data";

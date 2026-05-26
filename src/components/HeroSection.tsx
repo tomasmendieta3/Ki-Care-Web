@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Button, Chip } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Shield, Truck, Headphones, ArrowRight, Users } from "lucide-react";
 
@@ -103,7 +102,7 @@ const HeroSection = () => {
           initial="enter"
           animate="center"
           exit="exit"
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
           className={`${slide.bg} relative overflow-hidden`}
         >
           {/* Subtle radial glow */}

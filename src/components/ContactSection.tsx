@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card, CardContent, Button, Chip } from "@heroui/react";
+import { Card, CardContent, Button } from "@heroui/react";
 import { motion } from "framer-motion";
 import { Send, CheckCircle2 } from "lucide-react";
 import { fadeInUp, stagger } from "@/lib/motion";
@@ -71,7 +71,7 @@ const ContactSection = () => {
             initial={{ opacity: 0, x: 24 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
           >
             {submitted ? (
               <Card variant="default" className="border border-zinc-100">

@@ -53,7 +53,7 @@ const ProblemaSection = () => {
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
           className="flex flex-col md:grid md:grid-cols-[auto_1fr] overflow-hidden"
         >
           {/* LEFT — big number */}
@@ -105,7 +105,7 @@ const ProblemaSection = () => {
                       initial={{ opacity: 0, x: -12 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
-                      transition={{ duration: 0.35, delay: 0.1 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                      transition={{ duration: 0.35, delay: 0.1 + i * 0.08, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
                       className="flex items-center gap-2.5 text-zinc-600 text-sm md:text-base"
                     >
                       <span className="w-1.5 h-1.5 rounded-full bg-[#9e1504] shrink-0" />
