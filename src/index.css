@@ -1,0 +1,16 @@
+@import "@heroui/styles";
+
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+:root {
+  --accent: oklch(0.68 0.19 40);
+  --accent-foreground: oklch(1 0 0);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

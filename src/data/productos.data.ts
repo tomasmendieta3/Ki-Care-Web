@@ -1,0 +1,257 @@
+export interface Review {
+  id: string;
+  author: string;
+  profession: string;
+  city: string;
+  rating: number;
+  date: string;
+  comment: string;
+  initials: string;
+  avatarColor: string;
+  verified: boolean;
+}
+
+export interface Producto {
+  id: string;
+  nombre: string;
+  subtitulo: string;
+  categoria: string;
+  precioOriginal: number;
+  precioActual: number;
+  descuento: number;
+  rating: number;
+  totalOpiniones: number;
+  vendidos: number;
+  stock: number;
+  envioFecha: string;
+  badges: string[];
+  profesionalesConsultando: number;
+  descripcion: string;
+  caracteristicas: string[];
+  imagen_url?: string;
+  reviews: Review[];
+}
+
+export const productos: Producto[] = [
+  {
+    id: "radiance-rf",
+    nombre: "Radiance RF",
+    subtitulo: "Radiofrecuencia Tripolar Profesional",
+    categoria: "Radiofrecuencia",
+    precioOriginal: 485000,
+    precioActual: 412250,
+    descuento: 15,
+    rating: 4.8,
+    totalOpiniones: 214,
+    vendidos: 892,
+    stock: 3,
+    envioFecha: "Mañana, 24 may",
+    badges: ["NUEVO", "MÁS VENDIDO"],
+    profesionalesConsultando: 14,
+    descripcion:
+      "Equipo de radiofrecuencia tripolar de última generación para tratamientos faciales y corporales. Tecnología de triple polo que garantiza resultados visibles desde la primera sesión.",
+    caracteristicas: [
+      "Aplicación facial y corporal",
+      "Pantalla táctil de 7 pulgadas",
+      "5 niveles de potencia ajustable",
+      "Certificación ANMAT vigente",
+      "220V – 50Hz",
+      "Origen: Industria nacional",
+    ],
+    reviews: [
+      {
+        id: "r1",
+        author: "María García",
+        profession: "Esteticista",
+        city: "Buenos Aires",
+        rating: 5,
+        date: "12 may 2025",
+        comment:
+          "Excelente equipo. Lo uso hace 3 meses y mis clientes ya notan los resultados desde la segunda sesión. La pantalla táctil es intuitiva y la potencia es muy buena para el precio. El soporte post-venta es increíble.",
+        initials: "MG",
+        avatarColor: "bg-rose-500",
+        verified: true,
+      },
+      {
+        id: "r2",
+        author: "Luciana Pérez",
+        profession: "Cosmetóloga",
+        city: "Córdoba",
+        rating: 5,
+        date: "28 abr 2025",
+        comment:
+          "Llegó perfectamente embalado y antes de lo previsto. La capacitación incluida fue muy completa, me ayudó a entender todos los protocolos. Mis clientas están encantadas con los resultados de reafirmación.",
+        initials: "LP",
+        avatarColor: "bg-violet-500",
+        verified: true,
+      },
+      {
+        id: "r3",
+        author: "Carolina Romero",
+        profession: "Kinesiologa",
+        city: "Rosario",
+        rating: 4,
+        date: "15 abr 2025",
+        comment:
+          "Muy buena calidad para el precio. El único detalle es que el manual podría tener más protocolos detallados, pero el equipo en sí es excelente. Muy fácil de manejar con los pacientes.",
+        initials: "CR",
+        avatarColor: "bg-emerald-500",
+        verified: true,
+      },
+      {
+        id: "r4",
+        author: "Sofía Martínez",
+        profession: "Esteticista",
+        city: "Mendoza",
+        rating: 5,
+        date: "3 abr 2025",
+        comment:
+          "Lo compré hace dos meses y ya recuperé la inversión. Mis clientes piden el tratamiento de radiofrecuencia constantemente. El equipo es robusto, silencioso y muy profesional.",
+        initials: "SM",
+        avatarColor: "bg-sky-500",
+        verified: false,
+      },
+    ],
+  },
+  {
+    id: "ultracav-pro",
+    nombre: "Ultracav Pro",
+    subtitulo: "Ultracavitador de Alta Potencia",
+    categoria: "Ultrasonido",
+    precioOriginal: 395000,
+    precioActual: 335750,
+    descuento: 15,
+    rating: 4.7,
+    totalOpiniones: 168,
+    vendidos: 654,
+    stock: 7,
+    envioFecha: "Mañana, 24 may",
+    badges: ["ALTA DEMANDA"],
+    profesionalesConsultando: 9,
+    descripcion:
+      "Ultracavitador profesional de alta potencia con tecnología de ultrasonido focalizado. Rompe adipocitos de forma no invasiva sin dolor ni tiempo de recuperación.",
+    caracteristicas: [
+      "Ultrasonido focalizado 40kHz",
+      "Panel digital con programas preset",
+      "Aplicación corporal",
+      "Cabezal 360° intercambiable",
+      "Certificación ANMAT vigente",
+      "Origen: Industria nacional",
+    ],
+    reviews: [
+      {
+        id: "r1",
+        author: "Valeria Torres",
+        profession: "Esteticista",
+        city: "La Plata",
+        rating: 5,
+        date: "8 may 2025",
+        comment:
+          "Increíble resultado en reducción de medidas. Mis clientas pierden entre 2 y 4 cm por sesión. El equipo es muy potente y silencioso. La entrega fue rapidísima y bien embalado.",
+        initials: "VT",
+        avatarColor: "bg-amber-500",
+        verified: true,
+      },
+      {
+        id: "r2",
+        author: "Andrea Núñez",
+        profession: "Cosmetóloga",
+        city: "Tucumán",
+        rating: 5,
+        date: "20 abr 2025",
+        comment:
+          "El panel digital con programas preset es una maravilla. Puedo elegir el protocolo exacto para cada cliente. Los resultados son visibles desde la primera sesión y se mantienen con el tiempo.",
+        initials: "AN",
+        avatarColor: "bg-pink-500",
+        verified: true,
+      },
+      {
+        id: "r3",
+        author: "Patricia Díaz",
+        profession: "Kinesiologa",
+        city: "Santa Fe",
+        rating: 4,
+        date: "1 abr 2025",
+        comment:
+          "Buen equipo en general. Me gustaría que el cabezal viniera con más accesorios, pero la calidad de ultrasonido es muy buena. El soporte técnico respondió rápido cuando tuve una pregunta.",
+        initials: "PD",
+        avatarColor: "bg-teal-500",
+        verified: true,
+      },
+    ],
+  },
+  {
+    id: "combo-facial",
+    nombre: "Combo Facial Pro",
+    subtitulo: "Set Tratamiento Facial Completo",
+    categoria: "Set Completo",
+    precioOriginal: 720000,
+    precioActual: 576000,
+    descuento: 20,
+    rating: 4.9,
+    totalOpiniones: 87,
+    vendidos: 312,
+    stock: 5,
+    envioFecha: "Lun. 26 may",
+    badges: ["NUEVO", "20% OFF"],
+    profesionalesConsultando: 22,
+    descripcion:
+      "Kit completo para tratamientos faciales premium. Incluye equipo de radiofrecuencia facial, microdermoabrasión y máscara LED. Todo certificado y listo para trabajar.",
+    caracteristicas: [
+      "Radiofrecuencia facial + RF Eyes",
+      "Microdermoabrasión con 4 cabezales",
+      "Máscara LED 7 colores",
+      "Maletín profesional incluido",
+      "Certificación ANMAT vigente",
+      "Manual en español + video-tutoriales",
+    ],
+    reviews: [
+      {
+        id: "r1",
+        author: "Natalia Fernández",
+        profession: "Esteticista",
+        city: "Buenos Aires",
+        rating: 5,
+        date: "15 may 2025",
+        comment:
+          "El mejor combo que encontré en el mercado. Tener los tres equipos coordinados hace que los protocolos sean mucho más efectivos. El maletín profesional es un plus que mis clientas notan cuando llego a domicilio.",
+        initials: "NF",
+        avatarColor: "bg-indigo-500",
+        verified: true,
+      },
+      {
+        id: "r2",
+        author: "Daniela Sosa",
+        profession: "Cosmetóloga",
+        city: "Córdoba",
+        rating: 5,
+        date: "5 may 2025",
+        comment:
+          "La máscara LED es espectacular. La RF facial da resultados muy rápidos en lifting y la microdermoabrasión deja la piel impecable. Es una inversión que vale absolutamente la pena.",
+        initials: "DS",
+        avatarColor: "bg-rose-400",
+        verified: true,
+      },
+      {
+        id: "r3",
+        author: "Florencia López",
+        profession: "Esteticista",
+        city: "Rosario",
+        rating: 5,
+        date: "22 abr 2025",
+        comment:
+          "Compré el combo hace un mes y ya tengo agenda llena. Mis clientas ven los resultados en 3 sesiones y todas piden el tratamiento completo. El 20% de descuento fue clave para decidirme.",
+        initials: "FL",
+        avatarColor: "bg-purple-500",
+        verified: false,
+      },
+    ],
+  },
+];
+
+export const formatPrice = (price: number) =>
+  new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+    maximumFractionDigits: 0,
+  }).format(price);
