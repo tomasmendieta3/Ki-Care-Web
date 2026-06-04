@@ -313,9 +313,14 @@ const ProductoDetalle = () => {
               <button className="w-full py-4 rounded-2xl font-bold text-sm tracking-wide border-2 hover:bg-zinc-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2" style={{ borderColor: NAVY, color: NAVY }}>
                 <ShoppingCart className="w-4 h-4" /> AGREGAR AL CARRITO
               </button>
-              <button className="w-full py-4 rounded-2xl font-bold text-sm tracking-wide border border-green-200 text-green-700 hover:bg-green-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+              <a
+                href={`https://wa.me/5491127571920?text=Hola%21%20Vengo%20de%20la%20web%20de%20Ki%20Care.%20Me%20gustar%C3%ADa%20consultar%20por%20el%20equipo%20${encodeURIComponent(producto.nombre)}.`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-4 rounded-2xl font-bold text-sm tracking-wide border border-green-200 text-green-700 hover:bg-green-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              >
                 <MessageCircle className="w-4 h-4" /> CONSULTAR POR WHATSAPP
-              </button>
+              </a>
             </div>
 
             {/* Seller + Trust */}

@@ -44,7 +44,11 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center ml-4">
+          <Link
+            to="/"
+            className="flex items-center ml-4"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          >
             <img src="/logo 2.png" alt="Ki Care" className="h-12 w-auto" />
           </Link>
 
@@ -80,7 +84,7 @@ const Header = () => {
               size="sm"
               variant="primary"
               className="rounded-full px-5 text-sm font-medium shadow-sm"
-              onPress={() => handleScrollLink("#contacto")}
+              onPress={() => window.open("https://wa.me/5491127571920?text=Hola%21%20Vengo%20de%20la%20web%20de%20Ki%20Care.%20Me%20gustar%C3%ADa%20recibir%20asesoramiento.", "_blank")}
             >
               Quiero asesoramiento
             </Button>
@@ -132,7 +136,7 @@ const Header = () => {
                     variant="primary"
                     fullWidth
                     className="rounded-xl text-sm font-medium"
-                    onPress={() => handleScrollLink("#contacto")}
+                    onPress={() => window.open("https://wa.me/5491127571920?text=Hola%21%20Vengo%20de%20la%20web%20de%20Ki%20Care.%20Me%20gustar%C3%ADa%20recibir%20asesoramiento.", "_blank")}
                   >
                     Quiero asesoramiento
                   </Button>

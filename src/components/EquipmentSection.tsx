@@ -125,7 +125,7 @@ const EquipmentSection = () => {
                     fullWidth
                     className="rounded-xl font-semibold"
                     onPress={() =>
-                      document.getElementById("contacto")?.scrollIntoView({ behavior: "smooth" })
+                      window.open(`https://wa.me/5491127571920?text=Hola%21%20Vengo%20de%20la%20web%20de%20Ki%20Care.%20Me%20gustar%C3%ADa%20consultar%20el%20precio%20del%20equipo%20${encodeURIComponent(name)}.`, "_blank")
                     }
                   >
                     Consultar precio

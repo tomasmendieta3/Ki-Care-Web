@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Shield, Truck, Headphones, ArrowRight, Users } from "lucide-react";
+import { Shield, Truck, Headphones, ArrowRight } from "lucide-react";
 
 const badges = [
   { icon: Shield, label: "Certificación ANMAT" },
@@ -11,6 +11,7 @@ const badges = [
 const slides = [
   {
     bg: "bg-[#ff6e13]",
+    bgImage: "/Portada%201.jpg",
     chipBg: "bg-white/20 text-white",
     headlineColor: "text-white",
     accentColor: "text-white/70",
@@ -24,12 +25,14 @@ const slides = [
     accent: "segura y lista para trabajar.",
     sub: "Equipos con certificación vigente, envío a todo el país y soporte técnico local. Trabajá con confianza desde el primer día.",
     cta: "Quiero asesoramiento",
-    ctaScroll: "contacto",
+    ctaWa: "Hola%21%20Vengo%20de%20la%20web%20de%20Ki%20Care.%20Me%20gustar%C3%ADa%20asesoramiento%20sobre%20sus%20equipos%20de%20tecnolog%C3%ADa%20est%C3%A9tica.",
+    ctaScroll: null,
     ctaClass: "bg-white text-[#ff6e13] hover:bg-white/90",
     outlineClass: "border-white text-white hover:bg-white/10",
   },
   {
     bg: "bg-white",
+    bgImage: "/portada%203.jpg",
     chipBg: "bg-[#9e1504]/10 text-[#9e1504]",
     headlineColor: "text-zinc-900",
     accentColor: "text-[#9e1504]",
@@ -38,31 +41,34 @@ const slides = [
     badgeIconColor: "text-[#9e1504]",
     dotActive: "bg-[#9e1504]",
     dotInactive: "bg-zinc-200",
-    chip: "+300 profesionales activos",
-    chipIcon: Users,
-    headline: "¿Ya sos parte de la",
-    accent: "comunidad Ki Care?",
-    sub: "Más de 300 esteticistas, cosmetólogas y kinesiólogos ya trabajan con nuestros equipos. Sumate y accedé a soporte, protocolos y una comunidad que crece cada día.",
-    cta: "Quiero sumarme",
-    ctaScroll: "contacto",
+    chip: "Certificación ANMAT vigente",
+    chipIcon: Shield,
+    headline: "Equipos",
+    accent: "certificados por ANMAT.",
+    sub: "ANMAT es la autoridad nacional que certifica que un equipo cumple con los estándares de seguridad y eficacia exigidos en Argentina. Trabajar con equipos sin registro pone en riesgo a tus clientes. Todos nuestros equipos tienen habilitación vigente.",
+    cta: "Quiero asesoramiento",
+    ctaWa: "Hola%21%20Vengo%20de%20la%20web%20de%20Ki%20Care.%20Me%20interesa%20saber%20m%C3%A1s%20sobre%20los%20equipos%20con%20certificaci%C3%B3n%20ANMAT.",
+    ctaScroll: null,
     ctaClass: "bg-[#ff6e13] text-white hover:bg-[#e05e0a]",
     outlineClass: "border-zinc-300 text-zinc-700 hover:bg-zinc-50",
   },
   {
     bg: "bg-[#9e1504]",
+    bgImage: "/portada%202.jpg",
     chipBg: "bg-white/20 text-white",
     headlineColor: "text-white",
-    accentColor: "text-[#ff6e13]",
-    subColor: "text-white/80",
-    badgeColor: "text-white/70",
-    badgeIconColor: "text-[#ff6e13]",
+    accentColor: "text-white",
+    subColor: "text-white",
+    badgeColor: "text-white",
+    badgeIconColor: "text-white",
     dotActive: "bg-[#ff6e13]",
     dotInactive: "bg-white/30",
     chip: "Inversión con retorno real",
     headline: "Recuperá tu inversión",
-    accent: "en menos de 7 semanas.",
-    sub: "Con 4 sesiones por semana a $15.000 c/u ya cubrís el equipo. Ki Care no es un gasto, es una herramienta que trabaja para vos todos los días.",
+    accent: "en menos de 5 packs.",
+    sub: "El equipo vale $700.000 de contado. Cada sesión de 40 minutos se cobra a $40.000 — ofrecé packs de 6 sesiones a $170.000 y en solo 5 packs ya recuperás toda la inversión. Ki Care no es un gasto, es una herramienta que trabaja para vos todos los días.",
     cta: "Ver equipos",
+    ctaWa: null,
     ctaScroll: "productos",
     ctaClass: "bg-[#ff6e13] text-white hover:bg-[#e05e0a]",
     outlineClass: "border-white text-white hover:bg-white/10",
@@ -77,7 +83,7 @@ const HeroSection = () => {
     const interval = setInterval(() => {
       setDirection(1);
       setCurrent((i) => (i + 1) % slides.length);
-    }, 4000);
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -103,12 +109,13 @@ const HeroSection = () => {
           animate="center"
           exit="exit"
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
-          className={`${slide.bg} relative overflow-hidden`}
+          className={`${slide.bgImage ? "" : slide.bg} relative overflow-hidden`}
+          style={slide.bgImage ? { backgroundImage: `url(${slide.bgImage})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
         >
           {/* Subtle radial glow */}
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_70%_60%_at_50%_-10%,white/10,transparent)]" />
 
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 lg:pt-28 lg:pb-32">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 lg:pt-28 lg:pb-32">
             <div className="max-w-3xl">
 
               {/* Chip */}
@@ -153,13 +160,25 @@ const HeroSection = () => {
                 transition={{ delay: 0.25, duration: 0.45 }}
                 className="flex flex-wrap gap-3 mb-14"
               >
-                <button
-                  onClick={() => document.getElementById(slide.ctaScroll)?.scrollIntoView({ behavior: "smooth" })}
-                  className={`inline-flex items-center gap-2 px-8 py-3 rounded-full font-semibold text-base transition-colors duration-200 shadow-lg ${slide.ctaClass}`}
-                >
-                  {slide.cta}
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+                {slide.ctaWa ? (
+                  <a
+                    href={`https://wa.me/5491127571920?text=${slide.ctaWa}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`inline-flex items-center gap-2 px-8 py-3 rounded-full font-semibold text-base transition-colors duration-200 shadow-lg ${slide.ctaClass}`}
+                  >
+                    {slide.cta}
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
+                ) : (
+                  <button
+                    onClick={() => document.getElementById(slide.ctaScroll!)?.scrollIntoView({ behavior: "smooth" })}
+                    className={`inline-flex items-center gap-2 px-8 py-3 rounded-full font-semibold text-base transition-colors duration-200 shadow-lg ${slide.ctaClass}`}
+                  >
+                    {slide.cta}
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                )}
                 <button
                   onClick={() => document.getElementById("productos")?.scrollIntoView({ behavior: "smooth" })}
                   className={`inline-flex items-center px-8 py-3 rounded-full font-semibold text-base border transition-colors duration-200 ${slide.outlineClass}`}

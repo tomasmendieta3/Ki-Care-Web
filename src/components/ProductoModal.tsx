@@ -229,12 +229,15 @@ const ProductoModal = ({ producto, onClose }: ProductoModalProps) => {
                       <ShoppingCart className="w-4 h-4" />
                       AGREGAR AL CARRITO
                     </button>
-                    <button
+                    <a
+                      href={`https://wa.me/5491127571920?text=Hola%21%20Vengo%20de%20la%20web%20de%20Ki%20Care.%20Me%20gustar%C3%ADa%20consultar%20por%20el%20equipo%20${encodeURIComponent(producto.nombre)}.`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="w-full py-3.5 rounded-xl font-bold text-sm tracking-wide transition-all active:scale-[0.98] flex items-center justify-center gap-2 hover:bg-green-50 border border-green-200 text-green-700"
                     >
                       <MessageCircle className="w-4 h-4" />
                       CONSULTAR POR WHATSAPP
-                    </button>
+                    </a>
                   </div>
 
                   {/* Seller card */}
