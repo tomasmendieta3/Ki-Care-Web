@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, X, Users, Headphones, TrendingUp } from "lucide-react";
+import { Check, X, Headphones, TrendingUp } from "lucide-react";
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 20 },
@@ -9,31 +9,26 @@ const fadeUp = (delay = 0) => ({
 });
 
 const rows = [
-  { feature: "Precio del equipo",          comp: "$180.000 – $250.000", ki: "$412.250" },
-  { feature: "Certificación sanitaria",    comp: false,                  ki: true },
-  { feature: "Garantía real",              comp: "3 meses",              ki: "12 meses" },
-  { feature: "Soporte técnico",            comp: false,                  ki: true },
-  { feature: "Capacitación incluida",      comp: false,                  ki: true },
-  { feature: "Comunidad de profesionales", comp: false,                  ki: true },
-  { feature: "Repuestos y asistencia",     comp: false,                  ki: true },
-  { feature: "Estabilidad de frecuencia",  comp: "Variable / inestable", ki: "Alta precisión" },
+  { feature: "Precio del equipo",          comp: "$900.000 – $1.800.000", ki: "$700.000" },
+  { feature: "Certificación ANMAT",        comp: true,                    ki: true },
+  { feature: "Garantía real",              comp: "6 meses",               ki: "12 meses" },
+  { feature: "Soporte técnico local",      comp: "Limitado",              ki: true },
+  { feature: "Capacitación incluida",      comp: false,                   ki: true },
+  { feature: "Comunidad de profesionales", comp: false,                   ki: true },
+  { feature: "Repuestos y asistencia",     comp: "Importados / demorados", ki: "Stock local" },
+  { feature: "Estabilidad de frecuencia",  comp: "Alta precisión",        ki: "Alta precisión" },
 ];
 
 const roiItems = [
   {
     icon: TrendingUp,
     title: "Recuperás la inversión rápido.",
-    desc: "Con un equipo Ki Care activo, un profesional que realiza 4 sesiones por semana a $15.000 c/u recupera la inversión en menos de 7 semanas.",
+    desc: "El equipo vale $700.000 de contado. Cada sesión de 40 minutos se cobra a $40.000 — con packs de 6 sesiones a $170.000, en solo 5 packs ya recuperás toda la inversión.",
   },
   {
     icon: Headphones,
     title: "Acompañamiento real, no post-venta vacío.",
     desc: "Cada compra incluye soporte técnico directo, protocolos actualizados y acceso a nuestro equipo cuando lo necesitás.",
-  },
-  {
-    icon: Users,
-    title: "Comunidad Ki Care.",
-    desc: "Más de 300 profesionales compartiendo casos, protocolos y resultados. Un espacio para crecer junto a colegas que trabajan con la misma tecnología.",
   },
 ];
 
@@ -59,8 +54,7 @@ const InversionSection = () => (
           <span className="text-[#9e1504]">Es una herramienta que trabaja para vos.</span>
         </h2>
         <p className="text-zinc-500 text-base md:text-lg leading-relaxed">
-          Comparado con equipos más baratos del mercado, Ki Care no solo cuesta más:{" "}
-          <span className="text-zinc-900 font-medium">devuelve más.</span> En seguridad, en durabilidad, en resultados y en el respaldo que recibís después de la compra.
+          Comparado con otros equipos <span className="text-zinc-900 font-medium">certificados</span> del mercado, Ki Care ofrece las mismas o mejores prestaciones a un precio más accesible. Porque la certificación no es un diferencial — es el <span className="text-zinc-900 font-medium">piso mínimo</span> sobre el que construimos todo lo demás.
         </p>
       </motion.div>
 
@@ -89,7 +83,7 @@ const InversionSection = () => (
       </motion.div>
 
       {/* ROI + comunidad cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {roiItems.map(({ icon: Icon, title, desc }, i) => (
           <motion.div
             key={title}

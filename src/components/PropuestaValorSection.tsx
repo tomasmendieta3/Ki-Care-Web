@@ -21,17 +21,14 @@ function useCountUp(target: number, duration = 2000, start = false) {
 }
 
 const bullets = [
-  "Equipos certificados y desarrollados bajo estándares de seguridad sanitaria.",
-  "Tecnología de ultrasonido de baja frecuencia de alta precisión.",
+  "Equipos certificados y desarrollados bajo estándares de calidad, seguridad y eficacia.",
+  "Tecnología de alta precisión.",
   "Emisión uniforme y estable para tratamientos más seguros y efectivos.",
-  "Transductores de alta calidad y larga durabilidad.",
-  "Sistema de control térmico y protección electrónica integrada.",
-  "Intensidad y parámetros configurables según el protocolo profesional.",
-  "Mayor estabilidad operativa y menor vibración mecánica.",
-  "Diseño ergonómico para uso intensivo en centros estéticos.",
-  "Componentes de alto rendimiento y máxima confiabilidad técnica.",
-  "Compatibilidad con tratamientos corporales y protocolos combinados.",
-  "Soporte y respaldo pensado para profesionales que trabajan todos los días.",
+  "Sistemas de control y protección inteligente.",
+  "Intensidad y otros parámetros configurables según el protocolo profesional.",
+  "Diseño ergonómico para uso intensivo.",
+  "Materiales de alto rendimiento y máxima confiabilidad.",
+  "Soporte y respaldo pensado según tus necesidades.",
 ];
 
 const fadeUp = (delay = 0) => ({
@@ -59,16 +56,13 @@ const PropuestaValorSection = () => {
             className="border border-zinc-200 rounded-2xl px-8 py-10 flex flex-col gap-6 h-full"
           >
             {/* Photo box with counter overlay */}
-            <div className="w-full aspect-square border border-zinc-100 rounded-xl overflow-hidden relative flex items-center justify-center bg-zinc-50">
-              {/* Placeholder photo */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-zinc-300">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <path d="M21 15l-5-5L5 21" />
-                </svg>
-                <span className="text-xs tracking-widest uppercase text-zinc-400">Foto del profesional</span>
-              </div>
+            <div className="w-full aspect-square border border-zinc-100 rounded-xl overflow-hidden relative flex items-center justify-center bg-zinc-50 group">
+              {/* Background image with zoom on hover */}
+              <img
+                src="/profesionales.png"
+                alt="Profesionales Ki Care"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
 
               {/* Counter overlay */}
               <div className="absolute bottom-0 left-0 right-0 px-5 py-4 bg-gradient-to-t from-black/60 to-transparent">
@@ -87,13 +81,13 @@ const PropuestaValorSection = () => {
             {/* Propuesta de valor */}
             <div className="flex flex-col gap-4">
               <p className="text-zinc-800 text-sm md:text-base font-semibold leading-snug">
-                En Ki Care desarrollamos tecnología estética profesional pensada para brindar seguridad, precisión y resultados reales.
+                En Ki Care desarrollamos tecnología estética profesional pensada para brindar soluciones reales a los problemas de los usuarios y sus potenciales clientes.
               </p>
               <p className="text-zinc-500 text-sm leading-relaxed">
-                Nuestros equipos combinan innovación, confiabilidad y estándares de calidad. Cada dispositivo está diseñado con tecnología de ultrasonido de alta precisión, frecuencia estable y sistemas de protección electrónica que garantizan tratamientos más seguros, eficientes y confortables tanto para el profesional como para el paciente.
+                Nuestros equipos combinan innovación, confiabilidad y estándares de calidad internacionales. Cada equipo médico está diseñado con materiales e insumos de última generación lo que garantiza alta precisión, funcionamiento estable y sistemas de protección inteligentes que garantizan tratamientos más seguros, eficientes y confortables tanto para el profesional como para el paciente.
               </p>
               <p className="text-zinc-400 text-sm leading-relaxed italic">
-                Porque en estética no alcanza con que un equipo funcione: tiene que transmitir confianza, proteger la salud del paciente y respaldar el trabajo de cada profesional.
+                Porque en estética no alcanza con que un equipo funcione: tiene que transmitir confianza, proteger la salud del paciente, respaldar el trabajo de cada profesional generando los resultados esperados en el menor tiempo posible.
               </p>
             </div>
           </motion.div>

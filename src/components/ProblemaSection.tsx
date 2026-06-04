@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
+import { ShieldCheck, Wrench } from "lucide-react";
 
 function useCountUp(target: number, duration = 1800, start = false) {
   const [count, setCount] = useState(0);
@@ -21,13 +22,13 @@ function useCountUp(target: number, duration = 1800, start = false) {
 }
 
 const bullets = [
-  "Quemaduras",
-  "Manchas permanentes",
-  "Lesiones en la piel",
-  "Daño ocular",
-  "Infecciones",
-  "Resultados impredecibles",
-  "Fallas eléctricas durante el tratamiento",
+  "Riesgos para la salud del cliente",
+  "Secuelas estéticas no deseadas",
+  "Complicaciones durante el tratamiento",
+  "Resultados inconsistentes",
+  "Problemas sanitarios",
+  "Responsabilidad legal ante incidentes",
+  "Daño a tu reputación profesional",
 ];
 
 const ProblemaSection = () => {
@@ -46,8 +47,18 @@ const ProblemaSection = () => {
           transition={{ duration: 0.5 }}
           className="text-[#9e1504] text-sm font-semibold uppercase tracking-widest mb-10"
         >
-          El problema real
+          No pongas tu profesión en riesgo
         </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+          className="mb-8"
+        >
+          <img src="/info.png" alt="Información" className="w-full rounded-2xl object-cover shadow-xl shadow-zinc-200/80 ring-1 ring-zinc-100" />
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -116,6 +127,51 @@ const ProblemaSection = () => {
               </div>
             </div>
 
+          </div>
+        </motion.div>
+
+        {/* ANMAT value proposition box */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+          className="mt-8 rounded-2xl overflow-hidden relative p-8 md:p-10 shadow-2xl shadow-[#9e1504]/30 ring-1 ring-[#9e1504]/20 transition-all duration-300 hover:shadow-[0_24px_60px_rgba(158,21,4,0.45)] hover:-translate-y-1"
+          style={{ backgroundImage: "url(/valor.jpg)", backgroundSize: "cover", backgroundPosition: "center" }}
+        >
+          <div className="absolute inset-0 bg-[#9e1504]/55 rounded-2xl" />
+          <div className="relative z-10">
+          <p className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-3">¿Por qué importa la certificación?</p>
+          <h3 className="text-white text-2xl md:text-3xl font-bold leading-snug mb-8">
+            Comprar con ANMAT es comprar con certeza,<br className="hidden md:block" />
+            <span className="text-[#ff6e13]"> no con esperanza.</span>
+          </h3>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="flex gap-4">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-5 h-5 text-[#ff6e13]" />
+              </div>
+              <div>
+                <p className="text-white font-semibold mb-1">El equipo hace lo que dice que hace</p>
+                <p className="text-white/65 text-sm leading-relaxed">
+                  La certificación ANMAT garantiza que el equipo fue fabricado y validado para cumplir su función de forma segura, tanto para el paciente como para el profesional.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                <Wrench className="w-5 h-5 text-[#ff6e13]" />
+              </div>
+              <div>
+                <p className="text-white font-semibold mb-1">Soporte y repuestos por 5 años</p>
+                <p className="text-white/65 text-sm leading-relaxed">
+                  Con ANMAT, tenés garantía de soporte técnico y disponibilidad de repuestos durante toda la vida útil del equipo — incluso si la empresa fabricante cierra.
+                </p>
+              </div>
+            </div>
+          </div>
           </div>
         </motion.div>
 

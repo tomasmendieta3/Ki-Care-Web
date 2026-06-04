@@ -109,13 +109,19 @@ const HeroSection = () => {
           animate="center"
           exit="exit"
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
-          className={`${slide.bgImage ? "" : slide.bg} relative overflow-hidden`}
-          style={slide.bgImage ? { backgroundImage: `url(${slide.bgImage})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
+          className={`${slide.bg} relative overflow-hidden`}
         >
+          {/* Background image */}
+          {slide.bgImage && (
+            <div
+              className="absolute inset-0 z-0 bg-cover bg-center"
+              style={{ backgroundImage: `url(${slide.bgImage})` }}
+            />
+          )}
           {/* Subtle radial glow */}
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_70%_60%_at_50%_-10%,white/10,transparent)]" />
 
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 lg:pt-28 lg:pb-32">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-6 sm:pt-20 sm:pb-24 lg:pt-28 lg:pb-32">
             <div className="max-w-3xl">
 
               {/* Chip */}
