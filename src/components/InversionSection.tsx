@@ -11,9 +11,9 @@ const fadeUp = (delay = 0) => ({
 const rows = [
   { feature: "Precio del equipo",          comp: "$900.000 – $1.800.000", ki: "$700.000" },
   { feature: "Certificación ANMAT",        comp: true,                    ki: true },
-  { feature: "Garantía real",              comp: "6 meses",               ki: "12 meses" },
+  { feature: "Garantía real",              comp: "6 meses",               ki: "24 meses" },
   { feature: "Soporte técnico local",      comp: "Limitado",              ki: true },
-  { feature: "Capacitación incluida",      comp: false,                   ki: true },
+  { feature: "Guías y manuales",           comp: false,                   ki: true },
   { feature: "Comunidad de profesionales", comp: false,                   ki: true },
   { feature: "Repuestos y asistencia",     comp: "Importados / demorados", ki: "Stock local" },
   { feature: "Estabilidad de frecuencia",  comp: "Alta precisión",        ki: "Alta precisión" },
@@ -23,7 +23,7 @@ const roiItems = [
   {
     icon: TrendingUp,
     title: "Recuperás la inversión rápido.",
-    desc: "El equipo vale $700.000 de contado. Cada sesión de 40 minutos se cobra a $40.000 — con packs de 6 sesiones a $170.000, en solo 5 packs ya recuperás toda la inversión.",
+    desc: "El equipo vale $700.000 de contado. Cada sesión de 40 minutos se cobra a $40.000 — en solo 5 sesiones ya recuperás toda la inversión.",
   },
   {
     icon: Headphones,
@@ -59,7 +59,7 @@ const InversionSection = () => (
       </motion.div>
 
       {/* Comparison table */}
-      <motion.div {...fadeUp(0.1)} className="border border-zinc-200 rounded-2xl overflow-hidden">
+      <motion.div {...fadeUp(0.1)} className="border border-zinc-200 rounded-2xl overflow-x-auto">
         <div className="grid grid-cols-3 md:grid-cols-[1fr_auto_auto] bg-zinc-50 border-b border-zinc-200">
           <div className="px-3 md:px-6 py-4 text-zinc-400 text-xs font-semibold uppercase tracking-widest">Característica</div>
           <div className="px-3 md:px-6 py-4 text-center text-zinc-500 text-sm font-semibold md:w-44">Competencia</div>

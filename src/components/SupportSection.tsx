@@ -19,7 +19,7 @@ const pillars = [
   },
   {
     icon: BookOpen,
-    title: "Capacitación inicial",
+    title: "Guías y manuales",
     description:
       "Formación completa para que uses el equipo con confianza desde el primer día.",
   },

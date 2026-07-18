@@ -43,7 +43,7 @@ const equipment = [
 const certifications = [
   { icon: ShieldCheck, label: "Certificación ANMAT" },
   { icon: Wrench, label: "Soporte local" },
-  { icon: GraduationCap, label: "Capacitación incluida" },
+  { icon: GraduationCap, label: "Guías y manuales" },
   { icon: Package, label: "Repuestos disponibles" },
 ];
 

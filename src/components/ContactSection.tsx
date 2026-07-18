@@ -23,6 +23,9 @@ const ContactSection = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const professionLabel = professions.find((p) => p.value === form.profession)?.label ?? form.profession;
+    const message = `Hola! Soy ${form.name}, ${professionLabel} de ${form.city}. Me gustaría recibir asesoramiento sobre los equipos de Ki Care. Mi contacto: ${form.contact}.`;
+    window.open(`https://wa.me/5491127571920?text=${encodeURIComponent(message)}`, "_blank");
     setSubmitted(true);
   };
 

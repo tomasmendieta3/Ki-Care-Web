@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Star, ChevronRight } from "lucide-react";
-import { formatPrice, type Producto } from "@/data/productos.data";
+import { formatPrice, productos as staticProductos, type Producto } from "@/data/productos.data";
 import { supabase, mapDbToProducto, type DbProducto } from "@/lib/supabase";
 import ProductVisual from "@/components/ProductVisual";
 import { fadeInUp, stagger } from "@/lib/motion";
@@ -21,61 +21,60 @@ const Stars = ({ rating }: { rating: number }) => (
 );
 
 const ProductCard = ({ producto }: { producto: Producto }) => (
-  <motion.article
-    variants={fadeInUp}
-    className="bg-white rounded-2xl overflow-hidden border border-zinc-100 hover:border-zinc-200 hover:shadow-xl hover:shadow-zinc-100 transition-all duration-300 flex flex-col group"
-  >
-    <div className="relative overflow-hidden rounded-t-2xl">
-      <ProductVisual productId={producto.id} imageUrl={producto.imagen_url} size="card" />
-      <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-        {producto.badges.map((b) => (
-          <span key={b} className="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full" style={{ backgroundColor: ORANGE, color: "#fff" }}>
-            {b}
-          </span>
-        ))}
+  <motion.article variants={fadeInUp} className="group">
+    <Link
+      to={`/productos/${producto.id}`}
+      className="bg-white rounded-2xl overflow-hidden border border-zinc-100 hover:border-zinc-200 hover:shadow-xl hover:shadow-zinc-100 transition-all duration-300 flex flex-col h-full"
+    >
+      <div className="relative overflow-hidden rounded-t-2xl">
+        <ProductVisual productId={producto.id} imageUrl={producto.imagen_principal} size="card" />
+        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+          {producto.badges.map((b) => (
+            <span key={b} className="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full" style={{ backgroundColor: ORANGE, color: "#fff" }}>
+              {b}
+            </span>
+          ))}
+        </div>
       </div>
-      {producto.descuento > 0 && (
-        <div className="absolute top-3 right-3">
-          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-white/90 border border-zinc-200 text-zinc-700">
-            {producto.descuento}% OFF
+
+      <div className="p-5 flex flex-col flex-1 gap-3">
+        <span className="text-[11px] font-bold tracking-widest uppercase text-zinc-400">
+          {producto.categoria}
+        </span>
+        <h3 className="text-zinc-900 font-bold text-lg leading-snug">{producto.nombre}</h3>
+        <p className="text-zinc-500 text-sm leading-relaxed line-clamp-2">{producto.descripcion}</p>
+
+        <div className="flex items-center gap-2">
+          <Stars rating={producto.rating} />
+          <span className="text-zinc-700 text-sm font-semibold">{producto.rating}</span>
+          <span className="text-zinc-300 text-xs">·</span>
+          <span className="text-zinc-400 text-xs">{producto.vendidos.toLocaleString()} vendidos</span>
+        </div>
+
+        <div className="flex flex-col gap-0.5 pt-1">
+          <div className="flex items-center gap-2">
+            <span className="text-zinc-400 text-sm line-through">{formatPrice(producto.precioOriginal)}</span>
+            {producto.descuento > 0 && (
+              <span className="text-green-700 text-base font-black">{producto.descuento}% OFF</span>
+            )}
+          </div>
+          <span className="text-zinc-900 font-black text-xl">{formatPrice(producto.precioActual)}</span>
+          <span className="text-green-800 text-xs font-medium">
+            {producto.cuotas} cuotas sin interés de {formatPrice(Math.round(producto.precioActual / producto.cuotas))}
           </span>
         </div>
-      )}
-    </div>
 
-    <div className="p-5 flex flex-col flex-1 gap-3">
-      <span className="text-[11px] font-bold tracking-widest uppercase text-zinc-400">
-        {producto.categoria}
-      </span>
-      <h3 className="text-zinc-900 font-bold text-lg leading-snug">{producto.nombre}</h3>
-      <p className="text-zinc-500 text-sm leading-relaxed line-clamp-2">{producto.descripcion}</p>
-
-      <div className="flex items-center gap-2">
-        <Stars rating={producto.rating} />
-        <span className="text-zinc-700 text-sm font-semibold">{producto.rating}</span>
-        <span className="text-zinc-300 text-xs">·</span>
-        <span className="text-zinc-400 text-xs">{producto.vendidos.toLocaleString()} vendidos</span>
+        <div className="mt-auto pt-2">
+          <div
+            className="w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 group-hover:opacity-90 transition-all"
+            style={{ backgroundColor: NAVY, color: "#fff" }}
+          >
+            Ver detalles
+            <ChevronRight className="w-4 h-4" />
+          </div>
+        </div>
       </div>
-
-      <div className="flex flex-col gap-0.5 pt-1">
-        <span className="text-zinc-400 text-sm line-through">{formatPrice(producto.precioOriginal)}</span>
-        <span className="text-zinc-900 font-black text-xl">{formatPrice(producto.precioActual)}</span>
-        <span className="text-green-600 text-xs font-medium">
-          12 cuotas sin interés de {formatPrice(Math.round(producto.precioActual / 12))}
-        </span>
-      </div>
-
-      <div className="mt-auto pt-2">
-        <Link
-          to={`/productos/${producto.id}`}
-          className="w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] hover:opacity-90"
-          style={{ backgroundColor: NAVY, color: "#fff" }}
-        >
-          Ver detalles
-          <ChevronRight className="w-4 h-4" />
-        </Link>
-      </div>
-    </div>
+    </Link>
   </motion.article>
 );
 
@@ -103,7 +102,11 @@ const Productos = () => {
       .eq("activo", true)
       .order("orden", { ascending: true })
       .then(({ data }) => {
-        if (data) setProductos((data as DbProducto[]).map(mapDbToProducto));
+        if (data && data.length > 0) {
+          setProductos((data as DbProducto[]).map(mapDbToProducto));
+        } else {
+          setProductos(staticProductos);
+        }
         setLoading(false);
       });
   }, []);

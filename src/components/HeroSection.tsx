@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Shield, Truck, Headphones, ArrowRight } from "lucide-react";
+import { Shield, Truck, Headphones, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { scrollToSection } from "@/lib/scroll";
 
 const badges = [
   { icon: Shield, label: "Certificación ANMAT" },
@@ -10,8 +11,8 @@ const badges = [
 
 const slides = [
   {
-    bg: "bg-[#ff6e13]",
-    bgImage: "/Portada%201.jpg",
+    bgImage: "/Mesa%20de%20trabajo%201.jpg",
+    mobileBg: "#ff6e13",
     chipBg: "bg-white/20 text-white",
     headlineColor: "text-white",
     accentColor: "text-white/70",
@@ -21,8 +22,9 @@ const slides = [
     dotActive: "bg-white",
     dotInactive: "bg-white/30",
     chip: "Equipamiento profesional certificado",
-    headline: "Tecnología estética profesional,",
-    accent: "segura y lista para trabajar.",
+    headline: "Equipos seguros, profesionales",
+    accent: "y de calidad Argentina.",
+    accentBadge: true,
     sub: "Equipos con certificación vigente, envío a todo el país y soporte técnico local. Trabajá con confianza desde el primer día.",
     cta: "Quiero asesoramiento",
     ctaWa: "Hola%21%20Vengo%20de%20la%20web%20de%20Ki%20Care.%20Me%20gustar%C3%ADa%20asesoramiento%20sobre%20sus%20equipos%20de%20tecnolog%C3%ADa%20est%C3%A9tica.",
@@ -31,8 +33,8 @@ const slides = [
     outlineClass: "border-white text-white hover:bg-white/10",
   },
   {
-    bg: "bg-white",
-    bgImage: "/portada%203.jpg",
+    bgImage: "/Mesa%20de%20trabajo%202.png",
+    mobileBg: "#ffffff",
     chipBg: "bg-[#9e1504]/10 text-[#9e1504]",
     headlineColor: "text-zinc-900",
     accentColor: "text-[#9e1504]",
@@ -53,8 +55,8 @@ const slides = [
     outlineClass: "border-zinc-300 text-zinc-700 hover:bg-zinc-50",
   },
   {
-    bg: "bg-[#9e1504]",
-    bgImage: "/portada%202.jpg",
+    bgImage: "/Mesa%20de%20trabajo%203.png",
+    mobileBg: "#9e1504",
     chipBg: "bg-white/20 text-white",
     headlineColor: "text-white",
     accentColor: "text-white",
@@ -65,8 +67,8 @@ const slides = [
     dotInactive: "bg-white/30",
     chip: "Inversión con retorno real",
     headline: "Recuperá tu inversión",
-    accent: "en menos de 5 packs.",
-    sub: "El equipo vale $700.000 de contado. Cada sesión de 40 minutos se cobra a $40.000 — ofrecé packs de 6 sesiones a $170.000 y en solo 5 packs ya recuperás toda la inversión. Ki Care no es un gasto, es una herramienta que trabaja para vos todos los días.",
+    accent: "en menos de 5 sesiones.",
+    sub: "Cada sesión de 40 minutos se cobra a $40.000 — en solo 5 sesiones ya recuperás toda la inversión. Ki Care no es un gasto, es una herramienta que trabaja para vos todos los días.",
     cta: "Ver equipos",
     ctaWa: null,
     ctaScroll: "productos",
@@ -94,8 +96,27 @@ const HeroSection = () => {
 
   const slide = slides[current];
 
+  const prev = () => goTo((current - 1 + slides.length) % slides.length);
+  const next = () => goTo((current + 1) % slides.length);
+
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative overflow-hidden w-full max-w-full">
+      {/* Prev */}
+      <button
+        onClick={prev}
+        className="absolute left-3 bottom-5 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 z-20 bg-black/20 hover:bg-black/40 text-white rounded-full p-1.5 transition-colors duration-200"
+      >
+        <ChevronLeft className="w-4 h-4" />
+      </button>
+
+      {/* Next */}
+      <button
+        onClick={next}
+        className="absolute right-3 bottom-5 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 z-20 bg-black/20 hover:bg-black/40 text-white rounded-full p-1.5 transition-colors duration-200"
+      >
+        <ChevronRight className="w-4 h-4" />
+      </button>
+
       <AnimatePresence mode="wait" initial={false} custom={direction}>
         <motion.section
           key={current}
@@ -109,19 +130,25 @@ const HeroSection = () => {
           animate="center"
           exit="exit"
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
-          className={`${slide.bg} relative overflow-hidden`}
+          className="relative overflow-hidden"
         >
-          {/* Background image */}
-          {slide.bgImage && (
+          {/* Banner — solid color on mobile, image on desktop */}
+          <div className="relative w-full min-h-[700px] sm:min-h-0 sm:aspect-[16/7]">
             <div
-              className="absolute inset-0 z-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${slide.bgImage})` }}
+              className="sm:hidden absolute inset-0"
+              style={{ backgroundColor: slide.mobileBg }}
             />
-          )}
-          {/* Subtle radial glow */}
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_70%_60%_at_50%_-10%,white/10,transparent)]" />
+            <img
+              src={slide.bgImage}
+              alt=""
+              className="hidden sm:block absolute inset-0 w-full h-full object-cover"
+              draggable={false}
+            />
+          </div>
 
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-6 sm:pt-20 sm:pb-24 lg:pt-28 lg:pb-32">
+          {/* Text overlay */}
+          <div className="absolute inset-0 z-10 flex items-center">
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl">
 
               {/* Chip */}
@@ -146,7 +173,11 @@ const HeroSection = () => {
                 style={{ fontSize: "clamp(2.25rem, 4.5vw, 3.75rem)" }}
               >
                 {slide.headline}{" "}
-                <span className={slide.accentColor}>{slide.accent}</span>
+                {slide.accentBadge ? (
+                  <span className="inline-block bg-[#9e1504] text-white px-3 py-1 rounded-sm">{slide.accent}</span>
+                ) : (
+                  <span className={slide.accentColor}>{slide.accent}</span>
+                )}
               </motion.h1>
 
               {/* Sub */}
@@ -154,7 +185,7 @@ const HeroSection = () => {
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.45 }}
-                className={`text-lg sm:text-xl leading-relaxed mb-10 max-w-2xl ${slide.subColor}`}
+                className={`text-sm sm:text-base leading-relaxed mb-10 max-w-sm ${slide.subColor}`}
               >
                 {slide.sub}
               </motion.p>
@@ -178,7 +209,7 @@ const HeroSection = () => {
                   </a>
                 ) : (
                   <button
-                    onClick={() => document.getElementById(slide.ctaScroll!)?.scrollIntoView({ behavior: "smooth" })}
+                    onClick={() => scrollToSection(slide.ctaScroll!)}
                     className={`inline-flex items-center gap-2 px-8 py-3 rounded-full font-semibold text-base transition-colors duration-200 shadow-lg ${slide.ctaClass}`}
                   >
                     {slide.cta}
@@ -186,7 +217,7 @@ const HeroSection = () => {
                   </button>
                 )}
                 <button
-                  onClick={() => document.getElementById("productos")?.scrollIntoView({ behavior: "smooth" })}
+                  onClick={() => scrollToSection("productos")}
                   className={`inline-flex items-center px-8 py-3 rounded-full font-semibold text-base border transition-colors duration-200 ${slide.outlineClass}`}
                 >
                   Ver equipos
@@ -221,6 +252,7 @@ const HeroSection = () => {
                 ))}
               </div>
 
+            </div>
             </div>
           </div>
         </motion.section>

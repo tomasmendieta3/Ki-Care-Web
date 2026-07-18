@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import {
-  Star, Truck, AlertTriangle, ShieldCheck, GraduationCap,
-  Award, MessageCircle, ShoppingCart, CreditCard, Users,
-  CheckCircle2, ChevronRight, BadgeCheck,
+  Star, AlertTriangle, ShieldCheck, GraduationCap,
+  Award, MessageCircle, CreditCard,
+  CheckCircle2, ChevronRight, BadgeCheck, FileDown,
 } from "lucide-react";
-import { formatPrice, type Producto } from "@/data/productos.data";
+import { formatPrice, productos, ESPECIFICACIONES_FIELDS, type Producto } from "@/data/productos.data";
 import { supabase, mapDbToProducto, type DbProducto } from "@/lib/supabase";
+import { useCart } from "@/context/CartContext";
 import ProductVisual from "@/components/ProductVisual";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -16,8 +17,6 @@ import { fadeInUp, stagger } from "@/lib/motion";
 const NAVY = "#0A0F2C";
 const GOLD = "#9e1504";
 
-const avatarColors = ["bg-rose-500", "bg-violet-500", "bg-sky-500", "bg-emerald-500", "bg-amber-500"];
-const avatarInitials = ["LC", "MR", "PS", "AG", "KF"];
 
 const Stars = ({ rating, size = "sm" }: { rating: number; size?: "sm" | "md" | "lg" }) => {
   const s = size === "lg" ? "w-5 h-5" : size === "md" ? "w-4 h-4" : "w-3.5 h-3.5";
@@ -47,7 +46,7 @@ const OtroCard = ({ producto }: { producto: Producto }) => (
     className="flex gap-4 rounded-2xl border border-zinc-100 hover:border-zinc-200 hover:shadow-md transition-all duration-300 overflow-hidden group bg-white"
   >
     <div className="w-32 sm:w-40 shrink-0 rounded-l-2xl overflow-hidden">
-      <ProductVisual productId={producto.id} size="card" />
+      <ProductVisual productId={producto.id} imageUrl={producto.imagen_principal} size="card" />
     </div>
     <div className="flex flex-col justify-center gap-2 py-5 pr-5 flex-1">
       <span className="text-[10px] font-bold tracking-widest uppercase text-zinc-400">{producto.categoria}</span>
@@ -91,7 +90,7 @@ const ReviewCard = ({ review }: { review: Producto["reviews"][0] }) => (
     <div className="flex items-center justify-between pt-1 border-t border-zinc-50">
       <span className="text-zinc-300 text-xs">{review.date}</span>
       {review.verified && (
-        <span className="text-[10px] font-semibold text-green-600 flex items-center gap-1">
+        <span className="text-[10px] font-semibold text-green-800 flex items-center gap-1">
           <CheckCircle2 className="w-3 h-3" /> Compra verificada
         </span>
       )}
@@ -106,16 +105,23 @@ const ProductoDetalle = () => {
   const [producto, setProducto] = useState<Producto | null>(null);
   const [otrosProductos, setOtrosProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeThumb, setActiveThumb] = useState(0);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+  const zoomRef = useRef<HTMLDivElement>(null);
+  const { addItem } = useCart();
 
   useEffect(() => {
     supabase.from("productos").select("*").eq("activo", true).order("orden").then(({ data }) => {
-      if (!data) { navigate("/productos", { replace: true }); return; }
-      const todos = (data as DbProducto[]).map(mapDbToProducto);
-      const current = todos.find((p) => p.id === id);
+      const dbProductos = data && (data as DbProducto[]).length > 0
+        ? (data as DbProducto[]).map(mapDbToProducto)
+        : productos; // fallback a datos estáticos
+
+      const current = dbProductos.find((p) => p.id === id);
       if (!current) { navigate("/productos", { replace: true }); return; }
       setProducto(current);
-      setOtrosProductos(todos.filter((p) => p.id !== id));
+      setSelectedImage(current.imagen_principal || null);
+      setOtrosProductos(dbProductos.filter((p) => p.id !== id));
       setLoading(false);
     });
   }, [id, navigate]);
@@ -164,60 +170,124 @@ const ProductoDetalle = () => {
 
           {/* LEFT — imágenes */}
           <motion.div variants={fadeInUp} className="flex flex-col gap-4">
-            {/* Frame de imagen principal */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeThumb}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="rounded-3xl overflow-hidden border border-zinc-100 shadow-sm"
-                style={{ backgroundColor: NAVY }}
-              >
-                <div className="aspect-square sm:aspect-[4/3] lg:aspect-square flex items-center justify-center p-8">
-                  <ProductVisual productId={producto.id} imageUrl={producto.imagen_url} size="modal" />
-                </div>
-              </motion.div>
-            </AnimatePresence>
+            {/* Imagen principal con zoom */}
+            <div
+              ref={zoomRef}
+              className="rounded-3xl overflow-hidden border border-zinc-100 shadow-sm relative cursor-zoom-in bg-white"
+              onMouseEnter={() => selectedImage && setIsZoomed(true)}
+              onMouseLeave={() => setIsZoomed(false)}
+              onMouseMove={(e: ReactMouseEvent<HTMLDivElement>) => {
+                if (!zoomRef.current) return;
+                const rect = zoomRef.current.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                setZoomPos({ x, y });
+              }}
+            >
+              <div className="aspect-square sm:aspect-[4/3] lg:aspect-square flex items-center justify-center">
+                {selectedImage ? (
+                  <img
+                    src={selectedImage}
+                    alt={producto.nombre}
+                    className="absolute inset-0 w-full h-full object-contain p-8 transition-transform duration-200"
+                    style={isZoomed ? {
+                      transform: "scale(2)",
+                      transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
+                    } : undefined}
+                  />
+                ) : (
+                  <ProductVisual productId={producto.id} size="modal" />
+                )}
+              </div>
+            </div>
 
             {/* Thumbnails */}
-            <div className="flex gap-3">
-              {[0, 1, 2, 3].map((i) => (
-                <button
-                  key={i}
-                  onClick={() => setActiveThumb(i)}
-                  className="w-16 h-16 rounded-xl overflow-hidden shrink-0 transition-all duration-200 border-2"
-                  style={{
-                    borderColor: activeThumb === i ? GOLD : "transparent",
-                    outline: activeThumb === i ? "none" : "2px solid #f4f4f5",
-                    opacity: activeThumb === i ? 1 : 0.55,
-                    backgroundColor: NAVY,
-                  }}
-                >
-                  <div className="w-full h-full scale-75 flex items-center justify-center">
-                    <ProductVisual productId={producto.id} imageUrl={producto.imagen_url} size="card" />
-                  </div>
-                </button>
-              ))}
-            </div>
+            {(() => {
+              const allImages = [
+                producto.imagen_principal,
+                ...(producto.galeria || []),
+              ].filter(Boolean) as string[];
 
-            {/* Consultando bar */}
-            <div className="flex items-center gap-3 bg-zinc-50 border border-zinc-100 rounded-xl px-4 py-3">
-              <div className="flex -space-x-2">
-                {avatarInitials.slice(0, 4).map((init, i) => (
-                  <div key={i} className={`w-7 h-7 rounded-full ${avatarColors[i]} border-2 border-white flex items-center justify-center text-[10px] font-bold text-white`}>
-                    {init}
+              if (allImages.length <= 1) return null;
+
+              return (
+                <div className="grid grid-cols-4 gap-3">
+                  {allImages.slice(0, 4).map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedImage(img)}
+                      className="aspect-square rounded-xl overflow-hidden shrink-0 transition-all duration-200 border-2 relative"
+                      style={{
+                        borderColor: selectedImage === img ? GOLD : "transparent",
+                        outline: selectedImage === img ? "none" : "2px solid #f4f4f5",
+                        opacity: selectedImage === img ? 1 : 0.55,
+                        backgroundColor: "#ffffff",
+                      }}
+                    >
+                      <img src={img} alt={`${producto.nombre} ${i + 1}`} className="w-full h-full object-contain p-2" />
+                    </button>
+                  ))}
+                </div>
+              );
+            })()}
+
+            {/* Botón ficha técnica PDF */}
+            <a
+              href={producto.especificacionesPdfUrl || "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative flex items-center justify-center gap-2.5 w-full py-3.5 rounded-2xl font-bold text-sm tracking-wide text-white overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+              style={{ backgroundColor: "#ff6e13" }}
+            >
+              <span className="absolute inset-0 animate-[pulse-glow_2s_ease-in-out_infinite] rounded-2xl pointer-events-none" />
+              <FileDown className="w-4.5 h-4.5 relative z-10" />
+              <span className="relative z-10">Click acá para descargar ficha técnica</span>
+            </a>
+
+            {/* Especificaciones técnicas */}
+            {(() => {
+              const specs = producto.especificaciones ?? {};
+              // Solo se muestran los campos que el admin completó
+              const extraKeys = Object.keys(specs).filter(
+                (k) => !(ESPECIFICACIONES_FIELDS as readonly string[]).includes(k),
+              );
+              const allFields = [...ESPECIFICACIONES_FIELDS, ...extraKeys].filter((clave) => specs[clave]);
+              if (allFields.length === 0) return null;
+              return (
+                <div className="rounded-2xl border border-zinc-100 overflow-hidden">
+                  <div className="px-4 py-3 border-b border-zinc-100 flex items-center justify-between" style={{ backgroundColor: NAVY }}>
+                    <p className="text-xs font-bold tracking-widest uppercase text-white">
+                      Especificaciones técnicas
+                    </p>
+                    {producto.especificacionesPdfUrl && (
+                      <a
+                        href={producto.especificacionesPdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-[10px] font-bold tracking-wide uppercase text-white/80 hover:text-white transition-colors"
+                      >
+                        <FileDown className="w-3.5 h-3.5" />
+                        Descargar PDF
+                      </a>
+                    )}
                   </div>
-                ))}
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-                <span className="text-xs font-medium text-zinc-500">
-                  <span className="font-bold text-zinc-800">{producto.profesionalesConsultando}</span> profesionales consultando ahora
-                </span>
-              </div>
-            </div>
+                  <div className="divide-y divide-zinc-50" style={{ fontFamily: "'Poppins', sans-serif" }}>
+                    {allFields.map((clave, i) => (
+                      <div
+                        key={clave}
+                        className={`flex flex-col sm:flex-row sm:items-baseline sm:justify-between px-4 py-2.5 text-sm gap-0.5 sm:gap-0 ${i % 2 === 0 ? "bg-white" : "bg-zinc-50/60"}`}
+                      >
+                        <span className="text-zinc-500 font-medium">{clave}</span>
+                        <span className="font-bold sm:text-right text-zinc-950">
+                          {specs[clave]}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+
           </motion.div>
 
           {/* RIGHT — info */}
@@ -229,9 +299,6 @@ const ProductoDetalle = () => {
                   {b}
                 </span>
               ))}
-              <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-800 tracking-wide">
-                {producto.descuento}% OFF
-              </span>
             </div>
 
             {/* Title */}
@@ -240,6 +307,12 @@ const ProductoDetalle = () => {
                 {producto.nombre}
               </h1>
               <p className="font-semibold text-sm" style={{ color: GOLD }}>{producto.subtitulo}</p>
+              {producto.descuento > 0 && (
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-base font-black text-green-700">{producto.descuento}% OFF</span>
+                  <span className="text-[11px] font-semibold text-green-800/80">Promo Junio – Julio 2026</span>
+                </div>
+              )}
             </div>
 
             {/* Rating */}
@@ -252,7 +325,12 @@ const ProductoDetalle = () => {
             </div>
 
             {/* Description */}
-            <p className="text-zinc-500 leading-relaxed">{producto.descripcion}</p>
+            <div className="flex flex-col gap-3">
+              <p className="text-zinc-500 leading-relaxed">{producto.descripcion}</p>
+              {producto.descripcion2 && (
+                <p className="text-zinc-500 leading-relaxed">{producto.descripcion2}</p>
+              )}
+            </div>
 
             {/* Características */}
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -279,9 +357,9 @@ const ProductoDetalle = () => {
                 {formatPrice(producto.precioActual)}
               </span>
               <div className="flex items-center gap-1.5">
-                <CreditCard className="w-3.5 h-3.5 text-green-500" />
-                <span className="text-green-600 text-sm font-semibold">
-                  12 cuotas sin interés de {formatPrice(Math.round(producto.precioActual / 12))}
+                <CreditCard className="w-3.5 h-3.5 text-green-700" />
+                <span className="text-green-800 text-sm font-semibold">
+                  {producto.cuotas} cuotas sin interés de {formatPrice(Math.round(producto.precioActual / producto.cuotas))}
                 </span>
               </div>
             </div>
@@ -297,48 +375,48 @@ const ProductoDetalle = () => {
               </div>
             )}
 
-            <div className="flex items-center gap-3 rounded-xl px-4 py-3 bg-green-50 border border-green-100">
-              <Truck className="w-4 h-4 text-green-600 shrink-0" />
-              <div>
-                <p className="text-sm font-bold text-green-800">Envío gratis a todo el país</p>
-                <p className="text-xs text-green-600">Llega {producto.envioFecha}</p>
-              </div>
-            </div>
-
             {/* CTAs */}
             <div className="flex flex-col gap-2.5">
-              <button className="w-full py-4 rounded-2xl font-black text-sm tracking-wide hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-zinc-900/10" style={{ backgroundColor: NAVY, color: "#fff" }}>
+              <button
+                onClick={() => { addItem(producto); navigate("/carrito"); }}
+                className="w-full py-4 rounded-2xl font-black text-sm tracking-wide hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-zinc-900/10"
+                style={{ backgroundColor: NAVY, color: "#fff" }}
+              >
                 COMPRAR AHORA
               </button>
-              <button className="w-full py-4 rounded-2xl font-bold text-sm tracking-wide border-2 hover:bg-zinc-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2" style={{ borderColor: NAVY, color: NAVY }}>
-                <ShoppingCart className="w-4 h-4" /> AGREGAR AL CARRITO
-              </button>
               <a
-                href={`https://wa.me/5491127571920?text=Hola%21%20Vengo%20de%20la%20web%20de%20Ki%20Care.%20Me%20gustar%C3%ADa%20consultar%20por%20el%20equipo%20${encodeURIComponent(producto.nombre)}.`}
+                href={`https://wa.me/5491127571920?text=${encodeURIComponent(`Hola! Vengo de la web de Ki Care. Quiero comprar el equipo ${producto.nombre}.\n${window.location.href}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-4 rounded-2xl font-bold text-sm tracking-wide border border-green-200 text-green-700 hover:bg-green-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-2xl font-bold text-sm tracking-wide border border-green-300 text-green-700 hover:bg-green-100/60 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
-                <MessageCircle className="w-4 h-4" /> CONSULTAR POR WHATSAPP
+                <MessageCircle className="w-4 h-4" /> CERRAR COMPRA POR WHATSAPP
               </a>
             </div>
 
-            {/* Seller + Trust */}
-            <div className="flex items-center justify-between rounded-2xl px-4 py-3.5 border border-zinc-100 bg-zinc-50/60">
+            {/* Mercado Libre box */}
+            <a
+              href="https://www.mercadolibre.com.ar/radiofrecuencia-tripolar-facial-y-corporal-ki-care-anmat/up/MLAU3104586758"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between rounded-2xl px-5 py-4 bg-[#FFE600] hover:bg-[#f5de00] transition-colors duration-200 group"
+            >
               <div>
-                <p className="text-xs text-zinc-400 mb-0.5">Vendido por</p>
-                <p className="text-sm font-bold text-zinc-900">EstéticaPro Oficial</p>
+                <p className="text-sm font-bold text-[#2D3277]">
+                  En Mercado Libre encontranos
+                </p>
+                <p className="text-xs font-semibold text-[#2D3277]/70 mt-0.5">
+                  Hacé click acá para ir a nuestra tienda
+                </p>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold" style={{ backgroundColor: GOLD, color: NAVY }}>
-                <Award className="w-3.5 h-3.5" /> MERCADOLÍDER GOLD
-              </div>
-            </div>
+              <img src="/meli.png" alt="Mercado Libre" className="h-10 w-auto shrink-0 ml-3" />
+            </a>
 
             <div className="grid grid-cols-3 gap-2">
               {[
                 { icon: ShieldCheck, label: "ANMAT" },
-                { icon: Award, label: "12 meses garantía" },
-                { icon: GraduationCap, label: "Capacitación gratis" },
+                { icon: Award, label: `${producto.garantiaMeses} meses garantía` },
+                { icon: GraduationCap, label: "Guías y manuales" },
               ].map(({ icon: Icon, label }) => (
                 <div key={label} className="flex flex-col items-center gap-2 rounded-xl p-4 text-center border border-zinc-100 bg-zinc-50/40">
                   <Icon className="w-5 h-5 text-zinc-700" />
@@ -346,6 +424,55 @@ const ProductoDetalle = () => {
                 </div>
               ))}
             </div>
+
+            {/* Box de confianza — datos fiscales */}
+            <a
+              href="https://www.cuitonline.com/detalle/33715662979/grupo-proyectar-innovacion-s.r.l.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-start gap-4 rounded-2xl border border-zinc-100 bg-zinc-50/60 px-4 py-4 hover:bg-zinc-100/60 transition-colors group"
+            >
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: "#f0fdf4" }}>
+                <ShieldCheck className="w-5 h-5 text-green-800" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <p className="text-xs font-bold text-zinc-800">Empresa verificada en AFIP</p>
+                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-green-200 text-green-800">Inscripta</span>
+                </div>
+                <p className="text-xs font-semibold text-zinc-700">Grupo Proyectar Innovación S.R.L.</p>
+                <p className="text-[11px] text-zinc-400 mt-0.5">CUIT 33-71566297-9 · Los Canarios 213, Oro Verde, Entre Ríos</p>
+                <p className="text-[11px] text-zinc-400">Fabricación de equipos médicos · IVA Inscripto</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-zinc-300 group-hover:text-zinc-500 transition-colors shrink-0 mt-1" />
+            </a>
+
+            {/* Google Maps embed */}
+            <div className="rounded-2xl border border-zinc-100 overflow-hidden">
+              <div className="relative w-full aspect-video">
+                <iframe
+                  title="Proyectar Innova - Oro Verde, Entre Ríos"
+                  src="https://maps.google.com/maps?q=-31.8256242,-60.5142794&z=16&output=embed"
+                  className="absolute inset-0 w-full h-full"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+              <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-50/60 border-t border-zinc-100">
+                <p className="text-[11px] text-zinc-400">Los Canarios 213 · Oro Verde, Entre Ríos</p>
+                <a
+                  href="https://www.google.com/maps/place/Grupo+Proyectar+Innovaci%C3%B3n+SRL/@-31.8256241,-60.5191503,16z/data=!3m1!4b1!4m6!3m5!1s0x95b44b8f13829125:0x8eccb4e2f4d31cde!8m2!3d-31.8256242!4d-60.5142794!16s%2Fg%2F11j4czhwwn"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] font-semibold text-[#ff6e13] hover:underline"
+                >
+                  Ver en Maps
+                </a>
+              </div>
+            </div>
+
           </motion.div>
         </div>
       </motion.section>

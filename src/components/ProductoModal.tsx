@@ -74,37 +74,50 @@ const ProductoModal = ({ producto, onClose }: ProductoModalProps) => {
                 {/* ── LEFT: Image panel ── */}
                 <div className="flex flex-col" style={{ backgroundColor: NAVY }}>
                   {/* Main image */}
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={activeThumb}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.25 }}
-                      className="flex-1 min-h-[240px]"
-                    >
-                      <ProductVisual productId={producto.id} size="modal" />
-                    </motion.div>
-                  </AnimatePresence>
+                  {(() => {
+                    const allImages = [producto.imagen_principal, ...(producto.galeria || [])].filter(Boolean) as string[];
+                    const currentImg = allImages[activeThumb] || null;
+                    return (
+                      <>
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key={activeThumb}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.25 }}
+                            className="flex-1 min-h-[240px]"
+                          >
+                            {currentImg ? (
+                              <div className="w-full h-full flex items-center justify-center p-6">
+                                <img src={currentImg} alt={producto.nombre} className="max-w-full max-h-full object-contain" />
+                              </div>
+                            ) : (
+                              <ProductVisual productId={producto.id} size="modal" />
+                            )}
+                          </motion.div>
+                        </AnimatePresence>
 
-                  {/* Thumbnail strip */}
-                  <div className="px-5 pb-4 pt-3 flex gap-2.5">
-                    {[0, 1, 2, 3].map((i) => (
-                      <button
-                        key={i}
-                        onClick={() => setActiveThumb(i)}
-                        className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 transition-all duration-200"
-                        style={{
-                          border: `2px solid ${activeThumb === i ? GOLD : "rgba(201,168,76,0.2)"}`,
-                          opacity: activeThumb === i ? 1 : 0.55,
-                        }}
-                      >
-                        <div className="w-full h-full bg-[#0d1330] flex items-center justify-center scale-75">
-                          <ProductVisual productId={producto.id} size="card" />
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                        {allImages.length > 1 && (
+                          <div className="px-5 pb-4 pt-3 flex gap-2.5">
+                            {allImages.slice(0, 4).map((img, i) => (
+                              <button
+                                key={i}
+                                onClick={() => setActiveThumb(i)}
+                                className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 transition-all duration-200"
+                                style={{
+                                  border: `2px solid ${activeThumb === i ? GOLD : "rgba(201,168,76,0.2)"}`,
+                                  opacity: activeThumb === i ? 1 : 0.55,
+                                }}
+                              >
+                                <img src={img} alt={`${producto.nombre} ${i + 1}`} className="w-full h-full object-contain p-1" />
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
 
                   {/* Consultando bar */}
                   <div
@@ -187,7 +200,7 @@ const ProductoModal = ({ producto, onClose }: ProductoModalProps) => {
                     <div className="flex items-center gap-1.5">
                       <CreditCard className="w-3.5 h-3.5 text-green-500" />
                       <span className="text-green-600 text-sm font-semibold">
-                        12 cuotas sin interés de {formatPrice(Math.round(producto.precioActual / 12))}
+                        {producto.cuotas} cuotas sin interés de {formatPrice(Math.round(producto.precioActual / producto.cuotas))}
                       </span>
                     </div>
                   </div>
@@ -240,30 +253,32 @@ const ProductoModal = ({ producto, onClose }: ProductoModalProps) => {
                     </a>
                   </div>
 
-                  {/* Seller card */}
-                  <div
-                    className="flex items-center justify-between rounded-xl px-4 py-3 border"
-                    style={{ borderColor: "rgba(201,168,76,0.3)", backgroundColor: "rgba(10,15,44,0.03)" }}
+                  {/* Mercado Libre box */}
+                  <a
+                    href="https://www.mercadolibre.com.ar"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between rounded-xl px-4 py-3.5 border border-[#FFE600] bg-[#FFE600]/10 hover:bg-[#FFE600]/20 transition-colors duration-200 group"
                   >
-                    <div>
-                      <p className="text-xs text-zinc-500 mb-0.5">Vendido por</p>
-                      <p className="text-sm font-bold text-zinc-900">EstéticaPro Oficial</p>
+                    <p className="text-sm font-semibold text-zinc-800 group-hover:text-zinc-900">
+                      En Mercado Libre encontranos{" "}
+                      <span className="underline underline-offset-2">haciendo click acá</span>
+                    </p>
+                    {/* ML logo */}
+                    <div className="flex-shrink-0 ml-3">
+                      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="40" height="40" rx="8" fill="#FFE600"/>
+                        <text x="50%" y="56%" dominantBaseline="middle" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="900" fontSize="13" fill="#2D3277">ML</text>
+                      </svg>
                     </div>
-                    <div
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
-                      style={{ backgroundColor: GOLD, color: NAVY }}
-                    >
-                      <Award className="w-3.5 h-3.5" />
-                      MERCADOLÍDER GOLD
-                    </div>
-                  </div>
+                  </a>
 
                   {/* Trust row */}
                   <div className="grid grid-cols-3 gap-2 pt-1">
                     {[
                       { icon: ShieldCheck, label: "ANMAT" },
-                      { icon: Award, label: "12 meses\ngarantía" },
-                      { icon: GraduationCap, label: "Capacitación\ngratis" },
+                      { icon: Award, label: `${producto.garantiaMeses} meses\ngarantía` },
+                      { icon: GraduationCap, label: "Guías y\nmanuales" },
                     ].map(({ icon: Icon, label }) => (
                       <div
                         key={label}

@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Star } from "lucide-react";
+import { supabase, mapDbToProducto, type DbProducto } from "@/lib/supabase";
+import { productos as staticProductos, formatPrice, type Producto } from "@/data/productos.data";
 
 function useCountUp(target: number, duration = 2000, start = false) {
   const [count, setCount] = useState(0);
@@ -43,10 +45,34 @@ const PropuestaValorSection = () => {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const count = useCountUp(300, 2000, inView);
+  const [destacado, setDestacado] = useState<Producto | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from("productos")
+      .select("*")
+      .eq("destacado", true)
+      .eq("activo", true)
+      .limit(1)
+      .single()
+      .then(({ data }) => {
+        if (data) {
+          setDestacado(mapDbToProducto(data as DbProducto));
+        } else {
+          // fallback: primer producto estático
+          setDestacado(staticProductos[0] ?? null);
+        }
+      });
+  }, []);
 
   return (
-    <section className="bg-white py-20 md:py-28 px-4 overflow-hidden">
+    <section id="productos" className="bg-white py-20 md:py-28 px-4 overflow-hidden">
       <div className="max-w-6xl mx-auto">
+
+        <motion.h2 {...fadeUp(0)} className="text-3xl md:text-5xl font-bold text-zinc-900 leading-tight mb-8">
+          Sumate a los profesionales{" "}
+          <span className="text-[#9e1504]">que invirtieron en Ki Care.</span>
+        </motion.h2>
 
         <div ref={ref} className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
 
@@ -55,16 +81,14 @@ const PropuestaValorSection = () => {
             {...fadeUp(0.05)}
             className="border border-zinc-200 rounded-2xl px-8 py-10 flex flex-col gap-6 h-full"
           >
+
             {/* Photo box with counter overlay */}
             <div className="w-full aspect-square border border-zinc-100 rounded-xl overflow-hidden relative flex items-center justify-center bg-zinc-50 group">
-              {/* Background image with zoom on hover */}
               <img
                 src="/profesionales.png"
                 alt="Profesionales Ki Care"
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
-
-              {/* Counter overlay */}
               <div className="absolute bottom-0 left-0 right-0 px-5 py-4 bg-gradient-to-t from-black/60 to-transparent">
                 <p className="text-white text-[80px] md:text-[100px] font-extrabold leading-none tracking-tighter tabular-nums drop-shadow-lg">
                   +{count}
@@ -92,22 +116,51 @@ const PropuestaValorSection = () => {
             </div>
           </motion.div>
 
-          {/* RIGHT — foto + boton + bullets */}
+          {/* RIGHT — equipo destacado */}
           <motion.div
             {...fadeUp(0.1)}
             className="border border-zinc-200 rounded-2xl px-8 py-10 flex flex-col gap-5 h-full"
           >
-            {/* Square photo */}
-            <div className="w-full aspect-square border border-zinc-100 rounded-xl overflow-hidden relative flex items-center justify-center bg-zinc-50">
-              <div className="flex flex-col items-center justify-center gap-3 text-zinc-300">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <path d="M21 15l-5-5L5 21" />
-                </svg>
-                <span className="text-xs tracking-widest uppercase text-zinc-400">Foto del equipo</span>
+            {/* Producto destacado */}
+            {destacado ? (
+              <div
+                className="w-full aspect-square border border-zinc-100 rounded-xl overflow-hidden relative bg-white flex items-center justify-center group cursor-pointer"
+                onClick={() => navigate(`/productos/${destacado.id}`)}
+              >
+                {destacado.imagen_principal ? (
+                  <img
+                    src={destacado.imagen_principal}
+                    alt={destacado.nombre}
+                    className="w-full h-full object-contain p-6 transition-transform duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-3 text-zinc-600">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <circle cx="8.5" cy="8.5" r="1.5" />
+                      <path d="M21 15l-5-5L5 21" />
+                    </svg>
+                  </div>
+                )}
+
+                {/* Badge destacado */}
+                <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-[#ff6e13] text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
+                  <Star className="w-3 h-3 fill-white" />
+                  Destacado
+                </div>
+
+                {/* Info overlay */}
+                <div className="absolute bottom-0 left-0 right-0 px-5 py-5">
+                  <p className="text-zinc-900 font-bold text-lg leading-tight drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">{destacado.nombre}</p>
+                  <p className="text-zinc-500 text-xs mt-0.5 drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">{destacado.subtitulo}</p>
+                  <p className="text-green-500 font-black text-xl mt-1 drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">{formatPrice(destacado.precioActual)}</p>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="w-full aspect-square border border-zinc-100 rounded-xl bg-zinc-50 flex items-center justify-center">
+                <span className="text-xs text-zinc-400 uppercase tracking-widest">Sin equipo destacado</span>
+              </div>
+            )}
 
             {/* CTA */}
             <button

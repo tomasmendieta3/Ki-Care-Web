@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import {
-  ArrowLeft, Zap, Save, X, Plus, Upload, Image as ImageIcon,
+  ArrowLeft, Save, X, Plus, Image as ImageIcon, FileDown,
 } from "lucide-react";
 import { supabase, type DbProducto } from "@/lib/supabase";
+import { ESPECIFICACIONES_FIELDS } from "@/data/productos.data";
 
 const ORANGE = "#9e1504";
 
 type FormState = Omit<DbProducto, "created_at" | "updated_at" | "reviews"> & {
   reviews: DbProducto["reviews"];
+  especificaciones: Record<string, string>;
 };
 
 const emptyForm = (): FormState => ({
@@ -27,8 +29,15 @@ const emptyForm = (): FormState => ({
   badges: [],
   profesionales_consultando: 0,
   descripcion: "",
+  descripcion2: null,
+  cuotas: 12,
+  especificaciones_pdf_url: null,
+  garantia_meses: 24,
   caracteristicas: [],
-  imagen_url: "",
+  especificaciones: {},
+  imagen_principal: "",
+  galeria: [],
+  destacado: false,
   reviews: [],
   activo: true,
   orden: 0,
@@ -110,6 +119,42 @@ const TagInput = ({
   );
 };
 
+/* ── Fixed-field editor for especificaciones — un input por cada item del recuadro en la web ── */
+const SpecsFieldsInput = ({
+  specs,
+  onChange,
+}: {
+  specs: Record<string, string>;
+  onChange: (v: Record<string, string>) => void;
+}) => {
+  const setField = (campo: string, value: string) => {
+    onChange({ ...specs, [campo]: value });
+  };
+
+  return (
+    <div>
+      <label className={labelClass}>Especificaciones técnicas</label>
+      <p className="text-xs text-zinc-400 mb-3">
+        Los campos que dejes vacíos no se muestran en la ficha del producto.
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {ESPECIFICACIONES_FIELDS.map((campo) => (
+          <div key={campo}>
+            <label className="block text-xs font-medium text-zinc-500 mb-1">{campo}</label>
+            <input
+              type="text"
+              value={specs[campo] ?? ""}
+              onChange={(e) => setField(campo, e.target.value)}
+              placeholder={campo}
+              className={inputClass}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 /* ════════════════════════════════════════════════════ */
 const ProductoForm = () => {
   const navigate = useNavigate();
@@ -120,10 +165,13 @@ const ProductoForm = () => {
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>("");
+  const [imageFiles, setImageFiles] = useState<(File | null)[]>([null, null, null, null]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>(["", "", "", ""]);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [pdfName, setPdfName] = useState<string>("");
   const [uploadingImage, setUploadingImage] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
+  const pdfInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!isEditing) return;
@@ -151,13 +199,22 @@ const ProductoForm = () => {
           badges: d.badges ?? [],
           profesionales_consultando: d.profesionales_consultando ?? 0,
           descripcion: d.descripcion ?? "",
+          descripcion2: d.descripcion2 ?? null,
+          cuotas: d.cuotas ?? 12,
+          especificaciones_pdf_url: d.especificaciones_pdf_url ?? null,
+          garantia_meses: d.garantia_meses ?? 24,
           caracteristicas: d.caracteristicas ?? [],
-          imagen_url: d.imagen_url ?? "",
+          especificaciones: (d.especificaciones as Record<string, string>) ?? {},
+          imagen_principal: d.imagen_principal ?? "",
+          galeria: d.galeria ?? [],
+          destacado: d.destacado ?? false,
           reviews: d.reviews ?? [],
           activo: d.activo ?? true,
           orden: d.orden ?? 0,
         });
-        if (d.imagen_url) setImagePreview(d.imagen_url);
+        const previews = [d.imagen_principal ?? "", ...(d.galeria ?? [])];
+        setImagePreviews([previews[0] || "", previews[1] || "", previews[2] || "", previews[3] || ""]);
+        if (d.especificaciones_pdf_url) setPdfName("PDF cargado");
         setLoading(false);
       });
   }, [id, isEditing, navigate]);
@@ -175,25 +232,42 @@ const ProductoForm = () => {
     });
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (index: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
+    setImageFiles((prev) => { const next = [...prev]; next[index] = file; return next; });
+    setImagePreviews((prev) => { const next = [...prev]; next[index] = URL.createObjectURL(file); return next; });
   };
 
-  const uploadImage = async (productId: string): Promise<string> => {
-    if (!imageFile) return form.imagen_url;
+  const uploadImages = async (productId: string): Promise<{ principal: string; galeria: string[] }> => {
     setUploadingImage(true);
-    const ext = imageFile.name.split(".").pop();
-    const path = `${productId}/main.${ext}`;
-    const { error } = await supabase.storage
-      .from("product-images")
-      .upload(path, imageFile, { upsert: true });
+    const names = ["main", "gallery-1", "gallery-2", "gallery-3"];
+    const urls: string[] = [];
+
+    for (let i = 0; i < 4; i++) {
+      if (imageFiles[i]) {
+        const ext = imageFiles[i]!.name.split(".").pop();
+        const path = `${productId}/${names[i]}.${ext}`;
+        const { error } = await supabase.storage.from("product-images").upload(path, imageFiles[i]!, { upsert: true });
+        if (error) throw new Error("Error al subir imagen: " + error.message);
+        const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+        urls.push(`${data.publicUrl}?v=${Date.now()}`);
+      } else {
+        urls.push(imagePreviews[i] || "");
+      }
+    }
+
     setUploadingImage(false);
-    if (error) throw new Error("Error al subir imagen: " + error.message);
+    return { principal: urls[0], galeria: urls.slice(1).filter(Boolean) };
+  };
+
+  const uploadPdf = async (productId: string): Promise<string | null> => {
+    if (!pdfFile) return form.especificaciones_pdf_url;
+    const path = `${productId}/ficha-tecnica.pdf`;
+    const { error } = await supabase.storage.from("product-images").upload(path, pdfFile, { upsert: true });
+    if (error) throw new Error("Error al subir PDF: " + error.message);
     const { data } = supabase.storage.from("product-images").getPublicUrl(path);
-    return data.publicUrl;
+    return `${data.publicUrl}?v=${Date.now()}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -205,12 +279,15 @@ const ProductoForm = () => {
       const productId = form.id.trim().toLowerCase().replace(/\s+/g, "-");
       if (!productId) throw new Error("El ID (slug) es obligatorio.");
 
-      const imagen_url = await uploadImage(productId);
+      const { principal, galeria } = await uploadImages(productId);
+      const especificaciones_pdf_url = await uploadPdf(productId);
 
       const payload = {
         ...form,
         id: productId,
-        imagen_url,
+        imagen_principal: principal,
+        galeria,
+        especificaciones_pdf_url,
         updated_at: new Date().toISOString(),
       };
 
@@ -224,7 +301,11 @@ const ProductoForm = () => {
 
       navigate("/admin");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Ocurrió un error al guardar.");
+      const msg =
+        err instanceof Error
+          ? err.message
+          : (err as { message?: string })?.message ?? "Ocurrió un error al guardar.";
+      setError(msg);
     } finally {
       setSaving(false);
     }
@@ -240,17 +321,15 @@ const ProductoForm = () => {
 
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col">
-      {/* Header */}
-      <header className="bg-white border-b border-zinc-100 sticky top-0 z-10">
+      {/* Header fixed */}
+      <header className="bg-white border-b border-zinc-100 fixed top-0 left-0 right-0 z-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link to="/admin" className="p-2 rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors">
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: ORANGE }}>
-                <Zap className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
-              </div>
+              <img src="/logo 3.png" alt="Ki Care" className="h-7 w-auto" />
               <span className="font-semibold text-zinc-900 text-sm">
                 {isEditing ? "Editar producto" : "Nuevo producto"}
               </span>
@@ -273,6 +352,7 @@ const ProductoForm = () => {
         </div>
       </header>
 
+      <div className="h-14" />
       {/* Form */}
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
         {error && (
@@ -332,12 +412,22 @@ const ProductoForm = () => {
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className={labelClass}>Descripción</label>
+                <label className={labelClass}>Descripción (párrafo 1)</label>
                 <textarea
                   rows={3}
                   value={form.descripcion}
                   onChange={(e) => set("descripcion", e.target.value)}
-                  placeholder="Descripción breve del equipo..."
+                  placeholder="Primer párrafo de descripción..."
+                  className={`${inputClass} resize-none`}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className={labelClass}>Descripción (párrafo 2)</label>
+                <textarea
+                  rows={3}
+                  value={form.descripcion2 ?? ""}
+                  onChange={(e) => set("descripcion2", e.target.value || null)}
+                  placeholder="Segundo párrafo (opcional)..."
                   className={`${inputClass} resize-none`}
                 />
               </div>
@@ -395,7 +485,31 @@ const ProductoForm = () => {
                   className={inputClass}
                 />
               </div>
-              <div className="col-span-2">
+              <div>
+                <label className={labelClass}>Cuotas</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={48}
+                  value={form.cuotas || ""}
+                  onChange={(e) => set("cuotas", Number(e.target.value))}
+                  placeholder="12"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Garantía (meses)</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={120}
+                  value={form.garantia_meses || ""}
+                  onChange={(e) => set("garantia_meses", Number(e.target.value))}
+                  placeholder="24"
+                  className={inputClass}
+                />
+              </div>
+              <div>
                 <label className={labelClass}>Fecha de envío</label>
                 <input
                   type="text"
@@ -487,76 +601,132 @@ const ProductoForm = () => {
             </div>
           </Section>
 
-          {/* Imagen */}
-          <Section title="Imagen del producto">
-            <div className="flex flex-col sm:flex-row gap-6 items-start">
-              {/* Preview */}
-              <div
-                className="w-40 h-40 rounded-2xl border-2 border-dashed border-zinc-200 flex items-center justify-center overflow-hidden bg-zinc-50 shrink-0 cursor-pointer hover:border-[#9e1504] transition-colors"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                {imagePreview ? (
-                  <img src={imagePreview} alt="preview" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="flex flex-col items-center gap-2 text-zinc-400">
-                    <ImageIcon className="w-8 h-8" />
-                    <span className="text-xs font-medium">Sin imagen</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Upload */}
-              <div className="flex flex-col gap-3">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageChange}
-                />
+          {/* Especificaciones técnicas */}
+          <Section title="Especificaciones técnicas">
+            <SpecsFieldsInput
+              specs={form.especificaciones ?? {}}
+              onChange={(v) => set("especificaciones", v)}
+            />
+            <div className="mt-4">
+              <label className={labelClass}>PDF de ficha técnica</label>
+              <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => pdfInputRef.current?.click()}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-200 text-sm font-medium text-zinc-700 hover:bg-zinc-100 transition-colors"
                 >
-                  <Upload className="w-4 h-4" />
-                  Seleccionar imagen
+                  <FileDown className="w-4 h-4" />
+                  {pdfName || "Seleccionar PDF"}
                 </button>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  JPG, PNG o WebP. Recomendado: 800×800 px.<br />
-                  Se sube automáticamente al guardar.
-                </p>
-                {imageFile && (
-                  <p className="text-xs font-medium text-green-600">
-                    ✓ {imageFile.name} listo para subir
-                  </p>
+                {form.especificaciones_pdf_url && !pdfFile && (
+                  <a
+                    href={form.especificaciones_pdf_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-semibold text-[#9e1504] hover:underline"
+                  >
+                    Ver PDF actual
+                  </a>
                 )}
+                <input
+                  ref={pdfInputRef}
+                  type="file"
+                  accept=".pdf"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setPdfFile(file);
+                    setPdfName(file.name);
+                  }}
+                />
               </div>
+              {pdfFile && (
+                <p className="text-xs font-medium text-green-600 mt-2">✓ {pdfFile.name} listo para subir</p>
+              )}
+            </div>
+          </Section>
+
+          {/* Imágenes */}
+          <Section title="Imágenes del producto (hasta 4)">
+            <p className="text-xs text-zinc-400 mb-4">La primera imagen es la principal. JPG, PNG o WebP. Recomendado: 800×800 px.</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="flex flex-col gap-2">
+                  <div
+                    className="aspect-square rounded-2xl border-2 border-dashed border-zinc-200 flex items-center justify-center overflow-hidden bg-zinc-50 cursor-pointer hover:border-[#9e1504] transition-colors"
+                    onClick={() => fileInputRefs[i].current?.click()}
+                  >
+                    {imagePreviews[i] ? (
+                      <img src={imagePreviews[i]} alt={`preview ${i + 1}`} className="w-full h-full object-contain p-2" />
+                    ) : (
+                      <div className="flex flex-col items-center gap-1 text-zinc-400">
+                        <ImageIcon className="w-6 h-6" />
+                        <span className="text-[10px] font-medium">{i === 0 ? "Principal" : `Foto ${i + 1}`}</span>
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    ref={fileInputRefs[i]}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageChange(i)}
+                  />
+                  {imageFiles[i] && (
+                    <p className="text-[10px] font-medium text-green-600 truncate">
+                      ✓ {imageFiles[i]!.name}
+                    </p>
+                  )}
+                </div>
+              ))}
             </div>
           </Section>
 
           {/* Estado */}
           <Section title="Estado">
-            <label className="flex items-center gap-3 cursor-pointer group w-fit">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  className="sr-only"
-                  checked={form.activo}
-                  onChange={(e) => set("activo", e.target.checked)}
-                />
-                <div
-                  className={`w-11 h-6 rounded-full transition-colors ${form.activo ? "bg-[#9e1504]" : "bg-zinc-200"}`}
-                />
-                <div
-                  className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${form.activo ? "translate-x-5" : "translate-x-0"}`}
-                />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-zinc-900">{form.activo ? "Visible en el sitio" : "Oculto"}</p>
-                <p className="text-xs text-zinc-400">Los productos ocultos no aparecen en el catálogo público.</p>
-              </div>
-            </label>
+            <div className="flex flex-col gap-5">
+              <label className="flex items-center gap-3 cursor-pointer group w-fit">
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    className="sr-only"
+                    checked={form.activo}
+                    onChange={(e) => set("activo", e.target.checked)}
+                  />
+                  <div
+                    className={`w-11 h-6 rounded-full transition-colors ${form.activo ? "bg-[#9e1504]" : "bg-zinc-200"}`}
+                  />
+                  <div
+                    className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${form.activo ? "translate-x-5" : "translate-x-0"}`}
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-zinc-900">{form.activo ? "Visible en el sitio" : "Oculto"}</p>
+                  <p className="text-xs text-zinc-400">Los productos ocultos no aparecen en el catálogo público.</p>
+                </div>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer group w-fit">
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    className="sr-only"
+                    checked={form.destacado}
+                    onChange={(e) => set("destacado", e.target.checked)}
+                  />
+                  <div
+                    className={`w-11 h-6 rounded-full transition-colors ${form.destacado ? "bg-[#ff6e13]" : "bg-zinc-200"}`}
+                  />
+                  <div
+                    className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${form.destacado ? "translate-x-5" : "translate-x-0"}`}
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-zinc-900">{form.destacado ? "Producto destacado" : "No destacado"}</p>
+                  <p className="text-xs text-zinc-400">El producto destacado se muestra en la home junto al contador de +300 profesionales.</p>
+                </div>
+              </label>
+            </div>
           </Section>
         </form>
       </main>

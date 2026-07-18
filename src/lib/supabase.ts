@@ -21,8 +21,15 @@ export type DbProducto = {
   badges: string[];
   profesionales_consultando: number;
   descripcion: string;
+  descripcion2: string | null;
+  cuotas: number;
+  especificaciones_pdf_url: string | null;
+  garantia_meses: number;
   caracteristicas: string[];
-  imagen_url: string;
+  especificaciones: Record<string, string>;
+  imagen_principal: string;
+  galeria: string[];
+  destacado: boolean;
   reviews: import("@/data/productos.data").Review[];
   activo: boolean;
   orden: number;
@@ -47,8 +54,15 @@ export function mapDbToProducto(db: DbProducto): import("@/data/productos.data")
     badges: db.badges ?? [],
     profesionalesConsultando: db.profesionales_consultando ?? 0,
     descripcion: db.descripcion ?? "",
+    descripcion2: db.descripcion2 ?? undefined,
+    cuotas: db.cuotas ?? 12,
+    especificacionesPdfUrl: db.especificaciones_pdf_url ?? undefined,
+    garantiaMeses: db.garantia_meses ?? 24,
     caracteristicas: db.caracteristicas ?? [],
-    imagen_url: db.imagen_url ?? "",
+    especificaciones: db.especificaciones ?? {},
+    imagen_principal: db.imagen_principal ?? undefined,
+    galeria: db.galeria ?? [],
+    destacado: db.destacado ?? false,
     reviews: db.reviews ?? [],
   };
 }

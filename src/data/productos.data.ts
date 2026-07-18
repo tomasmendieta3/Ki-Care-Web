@@ -27,10 +27,33 @@ export interface Producto {
   badges: string[];
   profesionalesConsultando: number;
   descripcion: string;
+  descripcion2?: string;
+  cuotas: number;
+  especificacionesPdfUrl?: string;
+  garantiaMeses: number;
   caracteristicas: string[];
-  imagen_url?: string;
+  especificaciones?: Record<string, string>;
+  imagen_principal?: string;
+  galeria?: string[];
+  destacado?: boolean;
   reviews: Review[];
 }
+
+export const ESPECIFICACIONES_FIELDS = [
+  "Número de serie",
+  "Tecnología",
+  "Potencia máxima",
+  "Frecuencia de trabajo",
+  "Temperatura de cabezal",
+  "Voltaje de entrada",
+  "Pantalla",
+  "Modos de operación",
+  "Dimensiones",
+  "Peso",
+  "Certificación",
+  "Garantía",
+  "Fabricación",
+] as const;
 
 export const productos: Producto[] = [
   {
@@ -48,8 +71,13 @@ export const productos: Producto[] = [
     envioFecha: "Mañana, 24 may",
     badges: ["NUEVO", "MÁS VENDIDO"],
     profesionalesConsultando: 14,
+    cuotas: 12,
+    garantiaMeses: 24,
+    especificacionesPdfUrl: "#",
     descripcion:
-      "Equipo de radiofrecuencia tripolar de última generación para tratamientos faciales y corporales. Tecnología de triple polo que garantiza resultados visibles desde la primera sesión.",
+      "Equipo de radiofrecuencia tripolar de última generación para tratamientos faciales y corporales.",
+    descripcion2:
+      "Tecnología de triple polo que garantiza resultados visibles desde la primera sesión.",
     caracteristicas: [
       "Aplicación facial y corporal",
       "Pantalla táctil de 7 pulgadas",
@@ -58,6 +86,21 @@ export const productos: Producto[] = [
       "220V – 50Hz",
       "Origen: Industria nacional",
     ],
+    especificaciones: {
+      "Número de serie": "RF-2024-001",
+      "Tecnología": "Radiofrecuencia Tripolar",
+      "Potencia máxima": "80 W",
+      "Frecuencia de trabajo": "1 MHz",
+      "Temperatura de cabezal": "40 – 60 °C",
+      "Voltaje de entrada": "220 V / 50 Hz",
+      "Pantalla": "LCD táctil 7\"",
+      "Modos de operación": "Facial / Corporal / Contorno",
+      "Dimensiones": "38 × 28 × 22 cm",
+      "Peso": "3.8 kg",
+      "Certificación": "ANMAT · IEC 60601-1",
+      "Garantía": "24 meses",
+      "Fabricación": "Industria Argentina",
+    },
     reviews: [
       {
         id: "r1",
@@ -128,8 +171,12 @@ export const productos: Producto[] = [
     envioFecha: "Mañana, 24 may",
     badges: ["ALTA DEMANDA"],
     profesionalesConsultando: 9,
+    cuotas: 12,
+    garantiaMeses: 24,
     descripcion:
-      "Ultracavitador profesional de alta potencia con tecnología de ultrasonido focalizado. Rompe adipocitos de forma no invasiva sin dolor ni tiempo de recuperación.",
+      "Ultracavitador profesional de alta potencia con tecnología de ultrasonido focalizado.",
+    descripcion2:
+      "Rompe adipocitos de forma no invasiva sin dolor ni tiempo de recuperación.",
     caracteristicas: [
       "Ultrasonido focalizado 40kHz",
       "Panel digital con programas preset",
@@ -195,8 +242,12 @@ export const productos: Producto[] = [
     envioFecha: "Lun. 26 may",
     badges: ["NUEVO", "20% OFF"],
     profesionalesConsultando: 22,
+    cuotas: 12,
+    garantiaMeses: 24,
     descripcion:
-      "Kit completo para tratamientos faciales premium. Incluye equipo de radiofrecuencia facial, microdermoabrasión y máscara LED. Todo certificado y listo para trabajar.",
+      "Kit completo para tratamientos faciales premium. Incluye equipo de radiofrecuencia facial, microdermoabrasión y máscara LED.",
+    descripcion2:
+      "Todo certificado y listo para trabajar.",
     caracteristicas: [
       "Radiofrecuencia facial + RF Eyes",
       "Microdermoabrasión con 4 cabezales",

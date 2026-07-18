@@ -1,6 +1,25 @@
-const footerLinks = ["Productos", "Resultados", "Acompañamiento", "Contacto"];
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import { scrollToSection } from "@/lib/scroll";
+
+const sectionLinks = [
+  { label: "Acompañamiento", id: "acompañamiento" },
+  { label: "Contacto", id: "contacto" },
+];
 
 const Footer = () => {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const isHome = pathname === "/";
+
+  const handleScroll = (id: string) => {
+    if (isHome) {
+      scrollToSection(id);
+    } else {
+      navigate("/");
+      setTimeout(() => scrollToSection(id), 400);
+    }
+  };
+
   return (
     <footer className="bg-zinc-950 text-zinc-400">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
@@ -12,9 +31,14 @@ const Footer = () => {
               <img src="/anmat 2.png" alt="ANMAT" className="h-10 w-auto" />
             </div>
             <p className="text-sm leading-relaxed text-zinc-500 max-w-xs">
-              Tecnología estética profesional para esteticistas, cosmetólogas y
-              kinesiólogos en Argentina.
+              Tecnología estética profesional para médicos, esteticistas, cosmetólogas y kinesiólogos.
             </p>
+            <Link
+              to="/admin/login"
+              className="inline-block mt-4 text-xs font-medium text-zinc-600 hover:text-white transition-colors"
+            >
+              Acceso
+            </Link>
           </div>
 
           {/* Nav */}
@@ -23,14 +47,24 @@ const Footer = () => {
               Navegación
             </h4>
             <ul className="space-y-2.5">
-              {footerLinks.map((item) => (
-                <li key={item}>
-                  <a
-                    href={`#${item.toLowerCase()}`}
-                    className="text-sm text-zinc-500 hover:text-white transition-colors"
+              <li>
+                <Link to="/productos" className="text-sm text-zinc-500 hover:text-white transition-colors">
+                  Productos
+                </Link>
+              </li>
+              <li>
+                <Link to="/nosotros" className="text-sm text-zinc-500 hover:text-white transition-colors">
+                  Nosotros
+                </Link>
+              </li>
+              {sectionLinks.map(({ label, id }) => (
+                <li key={id}>
+                  <button
+                    onClick={() => handleScroll(id)}
+                    className="text-sm text-zinc-500 hover:text-white transition-colors text-left"
                   >
-                    {item}
-                  </a>
+                    {label}
+                  </button>
                 </li>
               ))}
             </ul>
@@ -42,9 +76,23 @@ const Footer = () => {
               Información
             </h4>
             <p className="text-sm text-zinc-500 mb-2">Argentina</p>
-            <p className="text-sm text-zinc-600 leading-relaxed">
+            <p className="text-sm text-zinc-600 leading-relaxed mb-4">
               Equipos de uso profesional exclusivamente. Certificación ANMAT vigente.
             </p>
+
+            {/* Box AFIP */}
+            <a
+              href="https://www.cuitonline.com/detalle/33715662979/grupo-proyectar-innovacion-s.r.l.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block border border-zinc-800 rounded-xl p-4 hover:border-zinc-600 transition-colors"
+            >
+              <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Empresa verificada en AFIP</p>
+              <p className="text-xs font-semibold text-zinc-300 mb-1">Grupo Proyectar Innovación S.R.L.</p>
+              <p className="text-[11px] text-zinc-600">CUIT 33-71566297-9</p>
+              <p className="text-[11px] text-zinc-600">Los Canarios 213, Oro Verde, Entre Ríos</p>
+              <p className="text-[11px] text-zinc-600 mt-1">Fabricación de equipos médicos · IVA Inscripto</p>
+            </a>
           </div>
         </div>
 

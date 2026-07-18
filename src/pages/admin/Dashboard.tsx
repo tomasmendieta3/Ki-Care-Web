@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, Pencil, Trash2, LogOut, Eye, EyeOff, Package } from "lucide-react";
+import { Plus, Pencil, Trash2, LogOut, Eye, EyeOff, Package, Star } from "lucide-react";
 import { supabase, type DbProducto } from "@/lib/supabase";
 import { formatPrice } from "@/data/productos.data";
 
@@ -32,6 +32,16 @@ const Dashboard = () => {
     await supabase.from("productos").update({ activo: !current }).eq("id", id);
     setProductos((prev) =>
       prev.map((p) => (p.id === id ? { ...p, activo: !current } : p))
+    );
+  };
+
+  const toggleDestacado = async (id: string, current: boolean) => {
+    if (current) return; // ya está destacado, no hacer nada
+    // quitar destacado de todos, luego marcar este
+    await supabase.from("productos").update({ destacado: false }).neq("id", "");
+    await supabase.from("productos").update({ destacado: true }).eq("id", id);
+    setProductos((prev) =>
+      prev.map((p) => ({ ...p, destacado: p.id === id }))
     );
   };
 
@@ -131,8 +141,8 @@ const Dashboard = () => {
                       {/* Imagen */}
                       <td className="px-5 py-3.5">
                         <div className="w-12 h-12 rounded-xl overflow-hidden bg-[#0A0F2C] shrink-0 flex items-center justify-center">
-                          {p.imagen_url ? (
-                            <img src={p.imagen_url} alt={p.nombre} className="w-full h-full object-cover" />
+                          {p.imagen_principal ? (
+                            <img src={p.imagen_principal} alt={p.nombre} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
                               <Package className="w-4 h-4 text-white/40" />
@@ -193,6 +203,17 @@ const Dashboard = () => {
                       {/* Acciones */}
                       <td className="px-5 py-3.5">
                         <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => toggleDestacado(p.id, p.destacado ?? false)}
+                            title={p.destacado ? "Equipo destacado" : "Destacar equipo"}
+                            className={`p-2 rounded-lg transition-colors ${
+                              p.destacado
+                                ? "text-[#ff6e13] bg-[#ff6e13]/10"
+                                : "text-zinc-400 hover:text-[#ff6e13] hover:bg-[#ff6e13]/10"
+                            }`}
+                          >
+                            <Star className={`w-4 h-4 ${p.destacado ? "fill-[#ff6e13]" : ""}`} />
+                          </button>
                           <Link
                             to={`/admin/productos/${p.id}/editar`}
                             className="p-2 rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"

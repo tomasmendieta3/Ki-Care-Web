@@ -1,9 +1,8 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { Star, ShoppingBag } from "lucide-react";
+import { Link } from "react-router-dom";
 import { productos, formatPrice, type Producto } from "@/data/productos.data";
 import ProductVisual from "@/components/ProductVisual";
-import ProductoModal from "@/components/ProductoModal";
 import { fadeInUp, stagger } from "@/lib/motion";
 
 const StarRating = ({ rating }: { rating: number }) => (
@@ -20,20 +19,15 @@ const StarRating = ({ rating }: { rating: number }) => (
   </div>
 );
 
-const ProductCard = ({
-  producto,
-  onOpen,
-}: {
-  producto: Producto;
-  onOpen: (p: Producto) => void;
-}) => (
-  <motion.article
-    variants={fadeInUp}
-    className="bg-[#0A0F2C] rounded-2xl overflow-hidden border border-[#9e1504]/15 hover:border-[#9e1504]/40 transition-all duration-300 hover:shadow-2xl hover:shadow-[#9e1504]/10 group flex flex-col"
-  >
+const ProductCard = ({ producto }: { producto: Producto }) => (
+  <motion.article variants={fadeInUp} className="group flex flex-col">
+    <Link
+      to={`/productos/${producto.id}`}
+      className="bg-[#0A0F2C] rounded-2xl overflow-hidden border border-[#9e1504]/15 hover:border-[#9e1504]/40 transition-all duration-300 hover:shadow-2xl hover:shadow-[#9e1504]/10 flex flex-col h-full"
+    >
     {/* Image */}
     <div className="relative overflow-hidden">
-      <ProductVisual productId={producto.id} size="card" />
+      <ProductVisual productId={producto.id} imageUrl={producto.imagen_principal} size="card" />
       {/* Badges */}
       <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
         {producto.badges.map((b) => (
@@ -80,30 +74,25 @@ const ProductCard = ({
           {formatPrice(producto.precioActual)}
         </span>
         <span className="text-green-400 text-xs font-medium">
-          12 cuotas sin interés de {formatPrice(Math.round(producto.precioActual / 12))}
+          {producto.cuotas} cuotas sin interés de {formatPrice(Math.round(producto.precioActual / producto.cuotas))}
         </span>
       </div>
 
       {/* CTA */}
       <div className="mt-auto pt-2">
-        <button
-          onClick={() => onOpen(producto)}
-          className="w-full py-3 rounded-xl font-semibold text-sm text-white bg-[#ff6e13] hover:bg-[#e05e0a] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
-        >
+        <div className="w-full py-3 rounded-xl font-semibold text-sm text-white bg-[#ff6e13] group-hover:bg-[#e05e0a] transition-all duration-200 flex items-center justify-center gap-2">
           <ShoppingBag className="w-4 h-4" />
           Ver detalles
-        </button>
+        </div>
       </div>
     </div>
+    </Link>
   </motion.article>
 );
 
 const ProductosSection = () => {
-  const [selected, setSelected] = useState<Producto | null>(null);
-
   return (
-    <>
-      <section id="productos" className="py-24 bg-[#06091a]">
+    <section id="productos" className="py-24 bg-[#06091a]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <motion.div
@@ -140,20 +129,11 @@ const ProductosSection = () => {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {productos.map((p) => (
-              <ProductCard key={p.id} producto={p} onOpen={setSelected} />
+              <ProductCard key={p.id} producto={p} />
             ))}
           </motion.div>
         </div>
       </section>
-
-      {/* Modal */}
-      {selected && (
-        <ProductoModal
-          producto={selected}
-          onClose={() => setSelected(null)}
-        />
-      )}
-    </>
   );
 };
 

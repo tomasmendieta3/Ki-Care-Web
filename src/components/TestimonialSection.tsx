@@ -3,13 +3,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Quote, Star, ChevronUp, ChevronDown } from "lucide-react";
 
 const featured = {
-  name: "María García",
-  profession: "Esteticista profesional",
-  city: "Buenos Aires",
-  initials: "MG",
+  name: "Dra. Villagra Lima Evelyn",
+  profession: "Médica · MN: 160008 · MP: 10962",
+  city: "",
+  initials: "VL",
   rating: 5,
   comment:
-    "Buscaba un equipo confiable, con soporte real. Hoy trabajo tranquila y con respaldo. No solo compré un equipo, sino un acompañamiento completo que me dio la seguridad para crecer mi negocio.",
+    "Nos deja un testimonio para que te saques dudas.",
 };
 
 const reviews = [
@@ -165,8 +165,19 @@ const TestimonialSection = () => {
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
             className="border border-zinc-200 rounded-2xl overflow-hidden flex flex-col"
           >
-            {/* Blank photo box */}
-            <div className="w-full aspect-[4/3] bg-zinc-100" />
+            {/* Video testimonio */}
+            <div className="w-full h-[720px] bg-black">
+              <video
+                className="w-full h-full object-cover"
+                controls
+                playsInline
+                webkit-playsinline=""
+                preload="metadata"
+                poster=""
+              >
+                <source src="/entrevista-doc-compressed.mp4" type="video/mp4" />
+              </video>
+            </div>
 
             {/* Info + quote */}
             <div className="px-7 py-7 flex flex-col gap-4 bg-zinc-50">
@@ -176,7 +187,7 @@ const TestimonialSection = () => {
                 </div>
                 <div>
                   <p className="text-zinc-900 font-semibold text-sm leading-none">{featured.name}</p>
-                  <p className="text-zinc-500 text-xs mt-0.5">{featured.profession} · {featured.city}</p>
+                  <p className="text-zinc-500 text-xs mt-0.5">{featured.profession}{featured.city ? ` · ${featured.city}` : ""}</p>
                 </div>
                 <div className="ml-auto"><Stars count={featured.rating} /></div>
               </div>
