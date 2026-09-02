@@ -162,7 +162,7 @@ const PedidoRecibo = ({
           Condiciones de garantía
         </div>
         <div style={{ color: "#444", lineHeight: "1.7" }}>
-          <div>• <strong>Período:</strong> 12 (doce) meses desde la fecha de compra, contra defectos de fabricación.</div>
+          <div>• <strong>Período:</strong> 24 (veinticuatro) meses desde la fecha de compra, contra defectos de fabricación.</div>
           <div>• <strong>Cobertura:</strong> Fallas en componentes eléctricos y electrónicos bajo uso normal del equipo.</div>
           <div>• <strong>Exclusiones:</strong> Daños por mal uso, golpes, humedad o modificaciones no autorizadas.</div>
           <div>• <strong>Vigencia:</strong> Conservar este comprobante como constancia de adquisición.</div>

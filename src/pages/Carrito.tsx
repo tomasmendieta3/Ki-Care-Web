@@ -26,13 +26,6 @@ const paymentMethods = [
     icon: "💵",
     available: true,
   },
-  {
-    id: "mercadopago",
-    label: "MercadoPago",
-    description: "Tarjeta de crédito, débito y cuotas sin interés",
-    icon: "💳",
-    available: true,
-  },
 ];
 
 const Carrito = () => {
@@ -49,8 +42,6 @@ const Carrito = () => {
   });
   const [payment, setPayment] = useState("transferencia");
   const [confirmed, setConfirmed] = useState(false);
-  const [loadingMP, setLoadingMP] = useState(false);
-  const [mpError, setMpError] = useState<string | null>(null);
   const [confirmedOrder, setConfirmedOrder] = useState<{
     numeroPedido: string;
     fecha: string;
@@ -65,41 +56,6 @@ const Carrito = () => {
   };
 
   const isFormValid = form.nombre && form.documento && form.telefono && form.direccion && form.ciudad && form.provincia;
-
-  const handleMercadoPago = async () => {
-    setLoadingMP(true);
-    setMpError(null);
-
-    const numeroPedido = `KC-${Date.now().toString().slice(-6)}`;
-    const fecha = new Date().toLocaleDateString("es-AR", {
-      day: "2-digit", month: "long", year: "numeric",
-    });
-
-    // Save order so the success page can show PDF download
-    localStorage.setItem("ki_care_order", JSON.stringify({
-      numeroPedido,
-      fecha,
-      items: [...items],
-      total,
-      metodoPago: "MercadoPago",
-      cliente: { ...form },
-    }));
-
-    try {
-      const res = await fetch("/api/create-preference", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items, cliente: form, total, numeroPedido }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.init_point) throw new Error(data.error ?? "Error al conectar con MercadoPago");
-      clearCart();
-      window.location.href = data.init_point;
-    } catch (err: unknown) {
-      setMpError(err instanceof Error ? err.message : "Error inesperado");
-      setLoadingMP(false);
-    }
-  };
 
   const handleConfirm = () => {
     const numeroPedido = `KC-${Date.now().toString().slice(-6)}`;
@@ -424,52 +380,21 @@ const Carrito = () => {
                 <span className="text-xl font-black" style={{ color: NAVY }}>{formatPrice(total)}</span>
               </div>
 
-              {payment === "mercadopago" ? (
-                <button
-                  onClick={handleMercadoPago}
-                  disabled={!isFormValid || loadingMP}
-                  className={`w-full py-4 rounded-xl font-bold text-sm tracking-wide text-white transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${
-                    isFormValid && !loadingMP
-                      ? "opacity-100 hover:opacity-90 shadow-lg"
-                      : "opacity-40 cursor-not-allowed"
-                  }`}
-                  style={{ backgroundColor: "#009ee3" }}
-                >
-                  {loadingMP ? (
-                    <>
-                      <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                      </svg>
-                      Conectando con MercadoPago...
-                    </>
-                  ) : (
-                    "💳 Pagar con MercadoPago"
-                  )}
-                </button>
-              ) : (
-                <button
-                  onClick={handleConfirm}
-                  disabled={!isFormValid}
-                  className={`w-full py-4 rounded-xl font-bold text-sm tracking-wide text-white transition-all active:scale-[0.98] ${
-                    isFormValid
-                      ? "opacity-100 hover:opacity-90 shadow-lg"
-                      : "opacity-40 cursor-not-allowed"
-                  }`}
-                  style={{ backgroundColor: ORANGE }}
-                >
-                  Confirmar pedido
-                </button>
-              )}
-
-              {mpError && (
-                <p className="text-[11px] text-red-500 text-center">{mpError}</p>
-              )}
+              <button
+                onClick={handleConfirm}
+                disabled={!isFormValid}
+                className={`w-full py-4 rounded-xl font-bold text-sm tracking-wide text-white transition-all active:scale-[0.98] ${
+                  isFormValid
+                    ? "opacity-100 hover:opacity-90 shadow-lg"
+                    : "opacity-40 cursor-not-allowed"
+                }`}
+                style={{ backgroundColor: ORANGE }}
+              >
+                Confirmar pedido
+              </button>
 
               <p className="text-[11px] text-zinc-400 text-center leading-relaxed">
-                {payment === "mercadopago"
-                  ? "Serás redirigido a MercadoPago para completar el pago de forma segura."
-                  : "Al confirmar te redirigimos a WhatsApp para coordinar el pago y la entrega."}
+                Al confirmar te redirigimos a WhatsApp para coordinar el pago y la entrega.
               </p>
             </div>
           </div>

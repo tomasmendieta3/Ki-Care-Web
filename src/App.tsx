@@ -8,7 +8,6 @@ import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
 import ProductoForm from "./pages/admin/ProductoForm";
 import AdminGuard from "./components/admin/AdminGuard";
-import PedidoExitoso from "./pages/PedidoExitoso";
 import Nosotros from "./pages/Nosotros";
 import { CartProvider } from "./context/CartContext";
 
@@ -29,7 +28,6 @@ function App() {
           <Route path="/productos" element={<Productos />} />
           <Route path="/productos/:id" element={<ProductoDetalle />} />
           <Route path="/carrito" element={<Carrito />} />
-          <Route path="/pedido/exitoso" element={<PedidoExitoso />} />
           <Route path="/nosotros" element={<Nosotros />} />
 
           {/* Admin */}
